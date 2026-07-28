@@ -12,16 +12,12 @@ import {
   Info,
   LogOut,
 } from 'lucide-react'
-import Cookies from 'js-cookie'
 
 export default function ProfilePage() {
   const router = useRouter()
 
   const handleLogout = async () => {
-    // Clear tokens and localStorage instead of relying on a missing backend endpoint
-    Cookies.remove('session_token', { path: '/' })
-    Cookies.remove('userId', { path: '/' })
-    Cookies.remove('ref_token', { path: '/' })
+    // Clear tokens safely on client side without a backend /logout endpoint
     if (typeof window !== 'undefined') {
       localStorage.clear()
     }
