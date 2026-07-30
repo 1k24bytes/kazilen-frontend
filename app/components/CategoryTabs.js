@@ -8,44 +8,33 @@ const categories = [
 
 export default function CategoryTabs({ value, onChange }) {
   return (
-    <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-3">
-      <div className="overflow-x-auto -mx-3 px-3">
-        <div className="flex gap-5 py-3">
-          {categories.map((category) => {
-            const isActive = value === category.name
+    <div className="bg-white border-b border-zinc-200/80 px-4 py-3">
+      <div className="max-w-xl mx-auto flex gap-2 overflow-x-auto no-scrollbar">
+        {categories.map((category) => {
+          const isActive = value === category.name
 
-            return (
-              <button
-                key={category.name}
-                onClick={() => onChange(category.name)}
-                className={`flex flex-col items-center pb-1 transition-all duration-200
-                  ${
-                    isActive
-                      ? 'border-b-4 border-pink-500 bg-pink-50 rounded-md'
-                      : ''
-                  }`}
-              >
+          return (
+            <button
+              key={category.name}
+              onClick={() => onChange(category.name)}
+              className={`flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium transition cursor-pointer border ${
+                isActive
+                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
+                  : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border-zinc-200/80'
+              }`}
+            >
+              <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 bg-zinc-200">
                 <Image
                   src={category.image}
                   alt={category.name}
-                  width={55}
-                  height={55}
-                  className="rounded-full"
+                  fill
+                  className="object-cover"
                 />
-
-                <span
-                  className={`text-xs mt-1 ${
-                    isActive
-                      ? 'text-pink-600 font-semibold'
-                      : 'text-gray-500'
-                  }`}
-                >
-                  {category.name}
-                </span>
-              </button>
-            )
-          })}
-        </div>
+              </div>
+              <span>{category.name}</span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

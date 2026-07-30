@@ -57,67 +57,70 @@ function CreateAccountClient() {
   };
 
   return (
-    <div className="min-h-screen bg-secondary px-6 py-8 flex flex-col items-center">
-      <div className="w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex items-center gap-3 mb-8">
-          <button onClick={() => router.back()} className="text-gray-500 hover:text-primary transition-colors">
-            <ArrowLeft size={24} />
+    <div className="min-h-screen bg-zinc-50/50 flex flex-col justify-center items-center px-4 py-8">
+      <div className="w-full max-w-sm bg-white rounded-lg border border-zinc-200/80 p-6 shadow-2xs space-y-5">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.back()}
+            className="w-8 h-8 rounded-md hover:bg-zinc-100 flex items-center justify-center text-zinc-600 transition cursor-pointer"
+          >
+            <ArrowLeft size={18} />
           </button>
-          <h1 className="text-xl font-bold text-foreground">Create Profile</h1>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Phone Number
-          </label>
-          <div className="flex items-center bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 cursor-not-allowed">
-            <span className="text-gray-400 font-medium mr-2">+91</span>
-            <input
-              type="tel"
-              value={phoneNo}
-              readOnly
-              className="w-full bg-transparent text-gray-500 focus:outline-none cursor-not-allowed font-medium"
-            />
+          <div>
+            <h1 className="text-lg font-bold tracking-tight text-zinc-900">Complete Profile</h1>
+            <p className="text-xs text-zinc-500">Provide your full name to set up your account</p>
           </div>
-          {!/^\d{10}$/.test(phoneNo) && (
-            <p className="text-xs text-error mt-2 font-medium">
-              Phone number missing. Please go back.
-            </p>
-          )}
         </div>
 
-        <div className="mb-8">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-            Full Name <span className="text-error">*</span>
-          </label>
-          <div className={`border rounded-xl px-4 py-3 transition-colors ${
-            touched.name && !name.trim() ? "border-error focus-within:ring-error focus-within:border-error" : "border-gray-300 focus-within:ring-primary focus-within:border-primary"
-          } focus-within:ring-2`}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
+              Phone Number
+            </label>
+            <div className="flex items-center bg-zinc-100 border border-zinc-200 rounded-md px-3 py-2.5 cursor-not-allowed">
+              <span className="text-zinc-500 text-xs font-medium mr-1.5">+91</span>
+              <input
+                type="tel"
+                value={phoneNo}
+                readOnly
+                className="w-full bg-transparent text-zinc-600 text-sm font-medium focus:outline-none cursor-not-allowed"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
+              Full Name <span className="text-red-500">*</span>
+            </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, name: true }))}
-              placeholder="Enter your full name"
-              className="w-full bg-transparent text-foreground focus:outline-none placeholder-gray-400 font-medium"
+              placeholder="e.g. Rahul Sharma"
+              className={`w-full px-3 py-2.5 border rounded-md text-sm text-zinc-900 focus:outline-none transition ${
+                touched.name && !name.trim()
+                  ? "border-red-400 focus:ring-1 focus:ring-red-400"
+                  : "border-zinc-300 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+              }`}
             />
+            {touched.name && !name.trim() && (
+              <p className="text-xs text-red-500 mt-1 font-medium">Full name is required</p>
+            )}
           </div>
-          {touched.name && !name.trim() && (
-            <p className="text-xs text-error mt-2 font-medium">Name is required</p>
-          )}
-        </div>
 
-        <button
-          onClick={handleCreateAccount}
-          disabled={!canSubmit || loading}
-          className={`w-full text-white font-semibold py-3.5 rounded-xl transition ${
-            !canSubmit || loading
-              ? "bg-gray-300 cursor-not-allowed text-gray-500"
-              : "bg-primary hover:bg-primary-hover shadow-md hover:shadow-lg"
-          }`}
-        >
-          {loading ? "Creating Account..." : "Create Account"}
-        </button>
+          <button
+            onClick={handleCreateAccount}
+            disabled={!canSubmit || loading}
+            className={`w-full text-white font-medium py-2.5 rounded-md text-sm shadow-xs transition cursor-pointer ${
+              !canSubmit || loading
+                ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
+                : "bg-zinc-900 hover:bg-zinc-800"
+            }`}
+          >
+            {loading ? "Creating Account..." : "Create Account"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -125,7 +128,7 @@ function CreateAccountClient() {
 
 export default function CreateAccountPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-secondary flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-zinc-50 flex items-center justify-center text-zinc-500 text-sm">Loading registration…</div>}>
       <CreateAccountClient />
     </Suspense>
   );

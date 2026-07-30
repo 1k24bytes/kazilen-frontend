@@ -1,13 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { Star } from "lucide-react";
+import { Star, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { useMutation } from "@tanstack/react-query";
-// import { bookService } from "../../lib/api";
-// import { apiRequest } from "@/utils/api";
-// import { getCookie } from "@/utils/customCookie";
 import ViewDetailsButton from "./ViewDetailsButton";
 
 export default function ProfessionalCard({ professional, subCategory }) {
@@ -25,47 +19,46 @@ export default function ProfessionalCard({ professional, subCategory }) {
 	};
 
 	return (
-		<div className="w-full relative">
-			<div className="flex items-start gap-4 border rounded-2xl p-4 shadow-sm bg-white mb-3">
-				<div className="flex flex-col flex-1">
-					<div className="flex justify-between items-start">
-						<h3 className="text-base font-semibold text-gray-800">
-							{professional.name}
-						</h3>
-						<div className="flex items-center bg-yellow-50 px-2 py-1 rounded-md">
-							<Star className="w-4 h-4 text-yellow-500 fill-yellow-400" />
-							<span className="ml-1 text-sm font-medium text-gray-700">
-								{professional.rating}
-							</span>
-						</div>
-					</div>
-
-					<p className="text-sm text-gray-500 mt-1 flex items-center gap-1">
-						<span className="truncate">{professional.address}</span>
+		<div className="w-full bg-white rounded-lg border border-zinc-200/80 p-5 shadow-2xs hover:shadow-xs transition space-y-4">
+			<div className="flex justify-between items-start gap-3">
+				<div>
+					<h3 className="text-base font-semibold text-zinc-900 tracking-tight">
+						{professional.name}
+					</h3>
+					<p className="text-xs text-zinc-500 mt-1 flex items-center gap-1">
+						<MapPin size={12} className="text-zinc-400 shrink-0" />
+						<span className="truncate max-w-[220px]">{professional.address || "Nagpur"}</span>
 					</p>
+				</div>
 
-					<div className="flex justify-between items-end mt-3 gap-2">
-						<ViewDetailsButton
-							professional={professional}
-							subCategory={subCategory}
-							details={details}
-							price={price}
-						/>
-						<div className="flex flex-col items-end">
-							<p className="text-sm font-semibold text-pink-600">
-								₹{price} / hour
-							</p>
-							<button
-								onClick={handleBookNow}
-								className="mt-1 px-3 py-1.5 text-sm rounded-lg bg-pink-500 text-white"
-							>
-								Book Now
-							</button>
-						</div>
+				<div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50/80 border border-amber-200/60 text-amber-800 text-xs font-semibold shrink-0">
+					<Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+					<span>{professional.rating || "4.8"}</span>
+				</div>
+			</div>
+
+			<div className="pt-3 border-t border-zinc-100 flex items-center justify-between gap-3">
+				<ViewDetailsButton
+					professional={professional}
+					subCategory={subCategory}
+					details={details}
+					price={price}
+				/>
+
+				<div className="flex items-center gap-3">
+					<div className="text-right">
+						<span className="text-xs text-zinc-500 block">Rate</span>
+						<span className="text-sm font-bold text-zinc-900">₹{price} <span className="text-[11px] font-normal text-zinc-500">/ hr</span></span>
 					</div>
+
+					<button
+						onClick={handleBookNow}
+						className="px-4 py-2 text-xs font-medium rounded-md bg-zinc-900 hover:bg-zinc-800 text-white shadow-xs transition cursor-pointer"
+					>
+						Book Now
+					</button>
 				</div>
 			</div>
 		</div>
 	);
 }
-

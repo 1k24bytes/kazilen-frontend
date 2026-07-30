@@ -1,10 +1,7 @@
-// frontend/src/app/components/Header.js
 'use client'
 
-import { MapPin, ChevronDown } from 'lucide-react'
+import { MapPin, ChevronDown, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-// import { useAuth } from '@/context/AuthContext'
-// import SearchBar from './SearchBar'
 
 export default function Header() {
   const router = useRouter()
@@ -18,43 +15,37 @@ export default function Header() {
   }
 
   return (
-    <div className="px-4 py-3 bg-white shadow-sm flex flex-col gap-3">
-      <div className="flex justify-between items-start">
-        {/* Address Section */}
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-zinc-200/80 px-4 py-3">
+      <div className="max-w-xl mx-auto flex items-center justify-between gap-3">
+        {/* Address Selector Button */}
         <button
           onClick={openAddress}
-          className="text-left"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-zinc-200/80 bg-zinc-50/50 hover:bg-zinc-100 text-zinc-800 text-xs font-medium transition cursor-pointer"
           aria-label="Select address"
         >
-          <div className="flex items-center text-sm font-medium text-gray-700">
-            <MapPin size={16} className="text-red-500 mr-1" />
-            Address
-            <ChevronDown size={14} className="ml-1 text-gray-600" />
-          </div>
-
+          <MapPin size={14} className="text-zinc-600 shrink-0" />
+          <span className="truncate max-w-[130px] sm:max-w-[200px]">Address</span>
+          <ChevronDown size={12} className="text-zinc-400 shrink-0" />
         </button>
 
-        {/* Center - City Availability */}
-        <div className="justify-self-center">
-          <span className="text-sm font-semibold text-orange-600 whitespace-nowrap">
-            Available in Nagpur
+        {/* Center Badge */}
+        <div className="flex items-center">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[11px] font-medium text-zinc-700">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Nagpur
           </span>
         </div>
-
 
         {/* Profile Button */}
         <button
           onClick={openProfile}
-          className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-semibold"
+          className="w-8 h-8 bg-zinc-900 hover:bg-zinc-800 text-white rounded-full flex items-center justify-center font-medium text-xs shadow-xs transition cursor-pointer"
           title="Open profile"
           aria-label="Open profile"
         >
-          P
+          <User size={14} />
         </button>
       </div>
-
-      {/* Search */}
-      {/* <SearchBar /> */}
-    </div>
+    </header>
   )
 }
