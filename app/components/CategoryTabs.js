@@ -1,40 +1,48 @@
 'use client'
 
 import Image from 'next/image'
+import { Zap } from 'lucide-react'
 
 const categories = [
-  { name: 'Electrician', image: '/categories/Electrician-service.webp' },
+  { id: 'Electrician', name: 'Electrician', icon: Zap, image: '/categories/Electrician-service.webp', desc: 'Wiring, repairs & fittings' },
 ]
 
 export default function CategoryTabs({ value, onChange }) {
   return (
-    <div className="bg-white border-b border-zinc-200/80 px-4 py-3">
-      <div className="max-w-xl mx-auto flex gap-2 overflow-x-auto no-scrollbar">
-        {categories.map((category) => {
-          const isActive = value === category.name
+    <div className="bg-white border-b border-slate-200/80 py-4 shadow-2xs">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-1">
+          {categories.map((category) => {
+            const isActive = value === category.name
 
-          return (
-            <button
-              key={category.name}
-              onClick={() => onChange(category.name)}
-              className={`flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium transition cursor-pointer border ${
-                isActive
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs'
-                  : 'bg-zinc-50 hover:bg-zinc-100 text-zinc-700 border-zinc-200/80'
-              }`}
-            >
-              <div className="relative w-6 h-6 rounded-full overflow-hidden shrink-0 bg-zinc-200">
-                <Image
-                  src={category.image}
-                  alt={category.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <span>{category.name}</span>
-            </button>
-          )
-        })}
+            return (
+              <button
+                key={category.name}
+                onClick={() => onChange(category.name)}
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer border ${
+                  isActive
+                    ? 'bg-[#ff8a4c] text-white border-[#ff8a4c] shadow-sm shadow-orange-500/20'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'
+                }`}
+              >
+                <div className={`relative w-7 h-7 rounded-lg overflow-hidden shrink-0 flex items-center justify-center ${isActive ? 'bg-white/20' : 'bg-slate-200/80'}`}>
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="text-left">
+                  <span className="block leading-tight">{category.name}</span>
+                  <span className={`text-[10px] font-normal ${isActive ? 'text-white/80' : 'text-slate-500'}`}>
+                    {category.desc}
+                  </span>
+                </div>
+              </button>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

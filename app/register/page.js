@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User, CheckCircle2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function CreateAccountClient() {
@@ -57,68 +57,73 @@ function CreateAccountClient() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50/50 flex flex-col justify-center items-center px-4 py-8">
-      <div className="w-full max-w-sm bg-white rounded-lg border border-zinc-200/80 p-6 shadow-2xs space-y-5">
-        <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 py-12 font-sans">
+      <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-xl space-y-6">
+        
+        <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
           <button
             onClick={() => router.back()}
-            className="w-8 h-8 rounded-md hover:bg-zinc-100 flex items-center justify-center text-zinc-600 transition cursor-pointer"
+            className="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer"
           >
-            <ArrowLeft size={18} />
+            <ArrowLeft size={20} />
           </button>
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-zinc-900">Complete Profile</h1>
-            <p className="text-xs text-zinc-500">Provide your full name to set up your account</p>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">Create Kazilen Profile</h1>
+            <p className="text-xs text-slate-500">Provide your full name to set up your account</p>
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
-              Phone Number
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Verified Mobile Number
             </label>
-            <div className="flex items-center bg-zinc-100 border border-zinc-200 rounded-md px-3 py-2.5 cursor-not-allowed">
-              <span className="text-zinc-500 text-xs font-medium mr-1.5">+91</span>
+            <div className="flex items-center bg-slate-100/80 border border-slate-200 rounded-xl px-4 py-3 cursor-not-allowed">
+              <span className="text-slate-500 text-sm font-semibold mr-2">+91</span>
               <input
                 type="tel"
                 value={phoneNo}
                 readOnly
-                className="w-full bg-transparent text-zinc-600 text-sm font-medium focus:outline-none cursor-not-allowed"
+                className="w-full bg-transparent text-slate-700 text-sm font-semibold focus:outline-none cursor-not-allowed"
               />
+              <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-zinc-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Full Name <span className="text-red-500">*</span>
             </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onBlur={() => setTouched((t) => ({ ...t, name: true }))}
-              placeholder="e.g. Rahul Sharma"
-              className={`w-full px-3 py-2.5 border rounded-md text-sm text-zinc-900 focus:outline-none transition ${
-                touched.name && !name.trim()
-                  ? "border-red-400 focus:ring-1 focus:ring-red-400"
-                  : "border-zinc-300 focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
-              }`}
-            />
+            <div className="relative">
+              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={() => setTouched((t) => ({ ...t, name: true }))}
+                placeholder="e.g. Rahul Sharma"
+                className={`w-full pl-11 pr-4 py-3 border rounded-xl text-sm font-semibold text-slate-900 focus:outline-none transition ${
+                  touched.name && !name.trim()
+                    ? "border-red-400 focus:ring-2 focus:ring-red-400/20"
+                    : "border-slate-300 focus:border-[#ff8a4c] focus:ring-2 focus:ring-[#ff8a4c]/20"
+                }`}
+              />
+            </div>
             {touched.name && !name.trim() && (
-              <p className="text-xs text-red-500 mt-1 font-medium">Full name is required</p>
+              <p className="text-xs text-red-500 mt-1.5 font-medium">Full name is required</p>
             )}
           </div>
 
           <button
             onClick={handleCreateAccount}
             disabled={!canSubmit || loading}
-            className={`w-full text-white font-medium py-2.5 rounded-md text-sm shadow-xs transition cursor-pointer ${
+            className={`w-full font-bold py-3.5 rounded-xl text-sm shadow-md transition cursor-pointer ${
               !canSubmit || loading
-                ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
-                : "bg-zinc-900 hover:bg-zinc-800"
+                ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                : "bg-[#ff8a4c] hover:bg-[#f07432] text-white shadow-orange-500/20 active:scale-98"
             }`}
           >
-            {loading ? "Creating Account..." : "Create Account"}
+            {loading ? "Creating Account..." : "Complete & Continue"}
           </button>
         </div>
       </div>
@@ -128,7 +133,7 @@ function CreateAccountClient() {
 
 export default function CreateAccountPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-zinc-50 flex items-center justify-center text-zinc-500 text-sm">Loading registration…</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-50 flex items-center justify-center text-slate-500 text-sm">Loading registration…</div>}>
       <CreateAccountClient />
     </Suspense>
   );

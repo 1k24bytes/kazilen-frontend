@@ -6,6 +6,7 @@ import SubCategoryTabs from "./components/SubCategoryTabs";
 import ProfessionalCard from "./components/ProfessionalCard";
 import ProfessionalCardSkeleton from "./components/skeletons/ProfessionalCardSkeleton";
 import Header from "./components/Header";
+import { Search, Zap } from "lucide-react";
 
 export default function HomePage() {
 	const [category, setCategory] = useState("Electrician");
@@ -23,11 +24,33 @@ export default function HomePage() {
 
 			setIsLoading(true);
 			try {
-				// Simulating API call
+				// Simulating API call or fetching from fast-backend
 				setTimeout(() => {
-					setWorkers([]);
+					setWorkers([
+						{
+							id: "w1",
+							name: "Ramesh Sharma",
+							address: "Dharampeth, Nagpur",
+							rating: "4.9",
+							sub_categories: { price: 150, details: "Expert electrical repairs and fan fittings" }
+						},
+						{
+							id: "w2",
+							name: "Suresh Verma",
+							address: "Sitabuldi, Nagpur",
+							rating: "4.8",
+							sub_categories: { price: 120, details: "Switchboard installation and home wiring" }
+						},
+						{
+							id: "w3",
+							name: "Anil Deshmukh",
+							address: "Manewada, Nagpur",
+							rating: "4.7",
+							sub_categories: { price: 130, details: "MCB & inverter maintenance specialist" }
+						}
+					]);
 					setIsLoading(false);
-				}, 600);
+				}, 500);
 			} catch (error) {
 				console.error("Failed to fetch workers:", error);
 				setWorkers([]);
@@ -39,8 +62,11 @@ export default function HomePage() {
 	}, [subCategory]);
 
 	return (
-		<div className="min-h-screen bg-zinc-50/50 text-zinc-900 flex flex-col">
+		<div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
+			{/* Top Header */}
 			<Header />
+
+			{/* Main Content Area */}
 			<main className="flex-1 pb-16">
 				{/* Category Selector */}
 				<CategoryTabs
@@ -56,16 +82,41 @@ export default function HomePage() {
 					<SubCategoryTabs value={subCategory} onChange={setSubCategory} />
 				)}
 
-				{/* Workers list section with max-w container & whitespace */}
-				<section className="max-w-xl mx-auto px-4 pt-6 pb-8 w-full">
+				{/* Workers Desktop Responsive Grid Section */}
+				<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 w-full">
+					
+					{/* Section Title */}
+					<div className="flex items-center justify-between mb-6">
+						<div>
+							<h2 className="text-xl font-bold text-slate-900 tracking-tight">
+								Available Professionals in Nagpur
+							</h2>
+							<p className="text-xs text-slate-500 mt-0.5">
+								Showing verified specialists available for instant dispatch
+							</p>
+						</div>
+
+						{workers.length > 0 && (
+							<span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200/80 text-slate-700">
+								{workers.length} Experts Ready
+							</span>
+						)}
+					</div>
+
 					{!subCategory && (
-						<div className="text-center py-12 text-zinc-500 text-sm">
-							Select a sub-category above to find available professionals.
+						<div className="text-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
+							<div className="w-12 h-12 rounded-full bg-[#fff4ed] text-[#ff8a4c] flex items-center justify-center mx-auto">
+								<Zap size={24} />
+							</div>
+							<h3 className="text-base font-bold text-slate-900">Select a Service Sub-category</h3>
+							<p className="text-xs text-slate-500 max-w-sm mx-auto">
+								Please choose a specific service option from the categories above to view available technicians near you.
+							</p>
 						</div>
 					)}
 
 					{subCategory && isLoading && (
-						<div className="space-y-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{Array.from({ length: 3 }).map((_, index) => (
 								<ProfessionalCardSkeleton key={index} />
 							))}
@@ -73,16 +124,19 @@ export default function HomePage() {
 					)}
 
 					{subCategory && !isLoading && workers?.length === 0 && (
-						<div className="text-center py-12 px-4 rounded-lg border border-zinc-200/80 bg-white shadow-2xs space-y-2">
-							<p className="text-sm font-semibold text-zinc-900">No professionals found</p>
-							<p className="text-xs text-zinc-500 max-w-xs mx-auto">
-								There are currently no active workers registered under this specific service option in your area.
+						<div className="text-center py-16 px-4 rounded-2xl border border-slate-200/80 bg-white shadow-2xs space-y-3">
+							<div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+								<Search size={24} />
+							</div>
+							<p className="text-base font-bold text-slate-900">No professionals found</p>
+							<p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+								There are currently no active workers registered under this specific service option in your immediate area right now.
 							</p>
 						</div>
 					)}
 
 					{!isLoading && workers && workers.length > 0 && (
-						<div className="space-y-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 							{workers.map((worker) => (
 								<ProfessionalCard
 									key={worker.id}
