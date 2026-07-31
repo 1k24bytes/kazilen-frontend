@@ -24,36 +24,19 @@ export default function HomePage() {
 
 			setIsLoading(true);
 			try {
-				// Simulating API call or fetching from fast-backend
-				setTimeout(() => {
-					setWorkers([
-						{
-							id: "w1",
-							name: "Ramesh Sharma",
-							address: "Dharampeth, Nagpur",
-							rating: "4.9",
-							sub_categories: { price: 150, details: "Expert electrical repairs and fan fittings" }
-						},
-						{
-							id: "w2",
-							name: "Suresh Verma",
-							address: "Sitabuldi, Nagpur",
-							rating: "4.8",
-							sub_categories: { price: 120, details: "Switchboard installation and home wiring" }
-						},
-						{
-							id: "w3",
-							name: "Anil Deshmukh",
-							address: "Manewada, Nagpur",
-							rating: "4.7",
-							sub_categories: { price: 130, details: "MCB & inverter maintenance specialist" }
-						}
-					]);
-					setIsLoading(false);
-				}, 500);
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/workers?sub_category=${encodeURIComponent(subCategory)}`
+				);
+				if (response.ok) {
+					const data = await response.json();
+					setWorkers(data.workers || data || []);
+				} else {
+					setWorkers([]);
+				}
 			} catch (error) {
 				console.error("Failed to fetch workers:", error);
 				setWorkers([]);
+			} finally {
 				setIsLoading(false);
 			}
 		}
@@ -82,23 +65,23 @@ export default function HomePage() {
 					<SubCategoryTabs value={subCategory} onChange={setSubCategory} />
 				)}
 
-				{/* Workers Desktop Responsive Grid Section */}
+				{/* Workers Grid Section */}
 				<section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 w-full">
 					
 					{/* Section Title */}
 					<div className="flex items-center justify-between mb-6">
 						<div>
 							<h2 className="text-xl font-bold text-slate-900 tracking-tight">
-								Available Professionals in Nagpur
+								Available Professionals
 							</h2>
 							<p className="text-xs text-slate-500 mt-0.5">
-								Showing verified specialists available for instant dispatch
+								Showing active specialists in your area
 							</p>
 						</div>
 
 						{workers.length > 0 && (
 							<span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200/80 text-slate-700">
-								{workers.length} Experts Ready
+								{workers.length} Experts Available
 							</span>
 						)}
 					</div>
@@ -110,7 +93,7 @@ export default function HomePage() {
 							</div>
 							<h3 className="text-base font-bold text-slate-900">Select a Service Sub-category</h3>
 							<p className="text-xs text-slate-500 max-w-sm mx-auto">
-								Please choose a specific service option from the categories above to view available technicians near you.
+								Please choose a service option from the categories above to view available technicians.
 							</p>
 						</div>
 					)}

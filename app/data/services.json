@@ -1,0 +1,25 @@
+{
+  "categories": [
+    {
+      "id": "Electrician",
+      "name": "Electrician",
+      "image": "/categories/Electrician-service.webp",
+      "desc": "Wiring, repairs & fittings"
+    }
+  ],
+  "subCategories": [
+    { "id": "consult", "label": "Book Consultation", "image": "/subcategories/consultation.webp", "tag": "Fast Booking" },
+    { "id": "hourly", "label": "Book by Hour", "image": "/subcategories/book-by-hour.webp", "tag": "Flexible" },
+    { "id": "fan-install", "label": "Fan Installation", "image": "/subcategories/fan-installation.webp" },
+    { "id": "fan-repair", "label": "Fan Repair", "image": "/subcategories/fan-repair.webp" },
+    { "id": "light", "label": "Light Fitting", "image": "/subcategories/light.webp" },
+    { "id": "home-wiring", "label": "Home Wiring", "image": "/subcategories/home-wiring.webp" },
+    { "id": "switch-install", "label": "Switch Box Install", "image": "/subcategories/switch-box-installation.webp" },
+    { "id": "switch-repair", "label": "Switch Box Repair", "image": "/subcategories/switch-box-repair.webp" },
+    { "id": "switch-mcb", "label": "MCB & Fuse", "image": "/subcategories/mcb.webp" },
+    { "id": "inverter-install", "label": "Inverter Install", "image": "/subcategories/inverter-installation.webp" },
+    { "id": "inverter-maintainance", "label": "Inverter Service", "image": "/subcategories/inverter-maintainance.webp" },
+    { "id": "cooler-repair", "label": "Cooler Repair", "image": "/subcategories/cooler-repair.webp" },
+    { "id": "motor-rewinding", "label": "Motor Rewinding", "image": "/subcategories/motor-rewinding.webp" }
+  ]
+}

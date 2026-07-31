@@ -1,11 +1,9 @@
 'use client'
 
 import Image from 'next/image'
-import { Zap } from 'lucide-react'
+import servicesData from '../data/services.json'
 
-const categories = [
-  { id: 'Electrician', name: 'Electrician', icon: Zap, image: '/categories/Electrician-service.webp', desc: 'Wiring, repairs & fittings' },
-]
+const categories = servicesData.categories || []
 
 export default function CategoryTabs({ value, onChange }) {
   return (
