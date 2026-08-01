@@ -2,12 +2,13 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, Suspense } from "react";
-import { ArrowLeft, ShieldCheck, RefreshCw } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 function VerifyOtpClient() {
 	const router = useRouter();
 	const params = useSearchParams();
-	const phone = params.get("phone");
+	const rawPhone = params.get("phone");
+	const phone = rawPhone ? rawPhone.replace(/\D/g, "") : "";
 
 	const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
 	const [seconds, setSeconds] = useState(30);
@@ -15,6 +16,12 @@ function VerifyOtpClient() {
 	const [loading, setLoading] = useState(false);
 	const [resending, setResending] = useState(false);
 	const inputRefs = useRef([]);
+
+	useEffect(() => {
+		if (phone && typeof window !== "undefined") {
+			localStorage.setItem("user_phone", phone);
+		}
+	}, [phone]);
 
 	const handleBack = () => router.back();
 
@@ -38,6 +45,7 @@ function VerifyOtpClient() {
 
 	const handleVerify = async () => {
 		const fullOtp = otpDigits.join("");
+		const cleanPhone = phone.replace(/\D/g, "");
 
 		if (fullOtp.length !== 6) {
 			alert("Enter a valid 6-digit OTP");
@@ -51,7 +59,7 @@ function VerifyOtpClient() {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					phone_number: `91${phone}`,
+					phone_number: `91${cleanPhone}`,
 					otp: fullOtp,
 					role: "customer"
 				}),
@@ -64,8 +72,12 @@ function VerifyOtpClient() {
 				return;
 			}
 
+			if (cleanPhone && typeof window !== "undefined") {
+				localStorage.setItem("user_phone", cleanPhone);
+			}
+
 			if (data.status === "needs_registration") {
-				router.push(`/register?phone=${encodeURIComponent(phone || "")}`);
+				router.push(`/register?phone=${encodeURIComponent(cleanPhone)}`);
 			} else if (data.status === "success" && data.access_token) {
 				localStorage.setItem("access_token", data.access_token);
 				router.push("/");
@@ -82,11 +94,12 @@ function VerifyOtpClient() {
 
 		try {
 			setResending(true);
+			const cleanPhone = phone.replace(/\D/g, "");
 
 			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/send-otp`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ phone_number: `91${phone}` }),
+				body: JSON.stringify({ phone_number: `91${cleanPhone}` }),
 			});
 
 			if (!response.ok) {

@@ -23,6 +23,10 @@ export default function LoginPage() {
 			return;
 		}
 
+		if (typeof window !== "undefined") {
+			localStorage.setItem("user_phone", phone);
+		}
+
 		try {
 			setLoading(true);
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { ArrowLeft, User, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, User, Calendar, Users, CheckCircle2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function CreateAccountClient() {
@@ -11,6 +11,8 @@ function CreateAccountClient() {
 
   const [phoneNo] = useState(phoneFromQuery || "");
   const [name, setName] = useState("");
+  const [dob, setDob] = useState("");
+  const [gender, setGender] = useState("Male");
   const [touched, setTouched] = useState({ name: false });
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +31,8 @@ function CreateAccountClient() {
         phone_number: `91${phoneNo}`,
         full_name: name.trim(),
         role: "customer",
+        dob: dob || null,
+        gender: gender || null,
       };
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
@@ -58,27 +62,28 @@ function CreateAccountClient() {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 py-12 font-sans">
-      <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-xl space-y-6">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-8 shadow-sm space-y-6">
         
         <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
           <button
             onClick={() => router.back()}
             className="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer"
           >
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </button>
           <div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900">Create Kazilen Profile</h1>
-            <p className="text-xs text-slate-500">Provide your full name to set up your account</p>
+            <p className="text-xs text-slate-500">Provide your personal details to finish setup</p>
           </div>
         </div>
 
         <div className="space-y-4">
+          {/* Phone */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Verified Mobile Number
             </label>
-            <div className="flex items-center bg-slate-100/80 border border-slate-200 rounded-xl px-4 py-3 cursor-not-allowed">
+            <div className="flex items-center bg-slate-100/80 border border-slate-200 rounded-xl px-4 py-2.5 cursor-not-allowed">
               <span className="text-slate-500 text-sm font-semibold mr-2">+91</span>
               <input
                 type="tel"
@@ -90,37 +95,74 @@ function CreateAccountClient() {
             </div>
           </div>
 
+          {/* Full Name */}
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Full Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onBlur={() => setTouched((t) => ({ ...t, name: true }))}
                 placeholder="e.g. Rahul Sharma"
-                className={`w-full pl-11 pr-4 py-3 border rounded-xl text-sm font-semibold text-slate-900 focus:outline-none transition ${
+                className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm font-medium text-slate-900 focus:outline-none transition ${
                   touched.name && !name.trim()
-                    ? "border-red-400 focus:ring-2 focus:ring-red-400/20"
-                    : "border-slate-300 focus:border-[#ff8a4c] focus:ring-2 focus:ring-[#ff8a4c]/20"
+                    ? "border-red-400 focus:ring-1 focus:ring-red-400"
+                    : "border-slate-300 focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c]"
                 }`}
               />
             </div>
             {touched.name && !name.trim() && (
-              <p className="text-xs text-red-500 mt-1.5 font-medium">Full name is required</p>
+              <p className="text-xs text-red-500 mt-1 font-medium">Full name is required</p>
             )}
+          </div>
+
+          {/* Date of Birth & Gender Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Date of Birth
+              </label>
+              <div className="relative">
+                <Calendar size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="date"
+                  value={dob}
+                  onChange={(e) => setDob(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                Gender
+              </label>
+              <div className="relative">
+                <Users size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <select
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition bg-white appearance-none"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <button
             onClick={handleCreateAccount}
             disabled={!canSubmit || loading}
-            className={`w-full font-bold py-3.5 rounded-xl text-sm shadow-md transition cursor-pointer ${
+            className={`w-full font-bold py-3 rounded-xl text-sm shadow-xs transition cursor-pointer ${
               !canSubmit || loading
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                : "bg-[#ff8a4c] hover:bg-[#f07432] text-white shadow-orange-500/20 active:scale-98"
+                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                : "bg-[#ff8a4c] hover:bg-[#f07432] text-white"
             }`}
           >
             {loading ? "Creating Account..." : "Complete & Continue"}
