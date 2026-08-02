@@ -62,7 +62,11 @@ export default function HomePage() {
 
 				{/* Sub Category Selector */}
 				{category && (
-					<SubCategoryTabs value={subCategory} onChange={setSubCategory} />
+					<SubCategoryTabs
+						value={subCategory}
+						onChange={setSubCategory}
+						category={category}
+					/>
 				)}
 
 				{/* Workers Grid Section */}
@@ -80,18 +84,18 @@ export default function HomePage() {
 						</div>
 
 						{workers.length > 0 && (
-							<span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-200/80 text-slate-700">
+							<span className="text-xs font-semibold px-3 py-1 rounded-sm bg-slate-200/80 text-slate-700">
 								{workers.length} Experts Available
 							</span>
 						)}
 					</div>
 
 					{!subCategory && (
-						<div className="text-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-2xs space-y-3">
-							<div className="w-12 h-12 rounded-full bg-[#fff4ed] text-[#ff8a4c] flex items-center justify-center mx-auto">
+						<div className="text-center py-16 bg-white rounded-md border border-slate-200/80 shadow-2xs space-y-3">
+							<div className="w-12 h-12 rounded-sm bg-[#fff4ed] text-[#ff8a4c] flex items-center justify-center mx-auto">
 								<Zap size={24} />
 							</div>
-							<h3 className="text-base font-bold text-slate-900">Select a Service Sub-category</h3>
+							<h3 className="text-base font-bold text-slate-900">Select a Service Option</h3>
 							<p className="text-xs text-slate-500 max-w-sm mx-auto">
 								Please choose a service option from the categories above to view available technicians.
 							</p>
@@ -107,8 +111,8 @@ export default function HomePage() {
 					)}
 
 					{subCategory && !isLoading && workers?.length === 0 && (
-						<div className="text-center py-16 px-4 rounded-2xl border border-slate-200/80 bg-white shadow-2xs space-y-3">
-							<div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+						<div className="text-center py-16 px-4 rounded-md border border-slate-200/80 bg-white shadow-2xs space-y-3">
+							<div className="w-12 h-12 rounded-sm bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
 								<Search size={24} />
 							</div>
 							<p className="text-base font-bold text-slate-900">No professionals found</p>
