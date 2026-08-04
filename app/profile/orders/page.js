@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
 import Link from "next/link";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_BASE_URL } from "@/lib/api";
+import Header from "@/app/components/Header";
 
 const STATUS_CONFIG = {
   pending: { label: "Pending", className: "bg-slate-100 text-slate-600 border-slate-200" },
@@ -39,7 +39,7 @@ export default function OrdersPage() {
 
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`${API}/bookings/my`, {
+        const res = await fetch(`${API_BASE_URL}/bookings/my`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.ok) {
@@ -62,7 +62,9 @@ export default function OrdersPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
-      {/* Header */}
+      <Header />
+
+      {/* Sub-header */}
       <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => router.push("/profile")}

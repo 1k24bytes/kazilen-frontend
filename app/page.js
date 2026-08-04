@@ -7,6 +7,7 @@ import ProfessionalCard from "./components/ProfessionalCard";
 import ProfessionalCardSkeleton from "./components/skeletons/ProfessionalCardSkeleton";
 import Header from "./components/Header";
 import { Search, Zap } from "lucide-react";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function HomePage() {
 	const [category, setCategory] = useState("Electrician");
@@ -25,7 +26,7 @@ export default function HomePage() {
 			setIsLoading(true);
 			try {
 				const response = await fetch(
-					`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/workers?sub_category=${encodeURIComponent(subCategory)}`
+					`${API_BASE_URL}/workers?sub_category=${encodeURIComponent(subCategory)}`
 				);
 				if (response.ok) {
 					const data = await response.json();

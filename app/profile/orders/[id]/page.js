@@ -12,8 +12,7 @@ import {
   ShieldCheck,
   User,
 } from "lucide-react";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_BASE_URL } from "@/lib/api";
 
 const STATUS_STEPS = ["pending", "accepted", "in_progress", "completed"];
 
@@ -59,7 +58,7 @@ export default function BookingDetailPage() {
     const token = localStorage.getItem("access_token");
     if (!token) { router.push("/login"); return; }
     try {
-      const res = await fetch(`${API}/bookings/${bookingId}`, {
+      const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
@@ -85,7 +84,7 @@ export default function BookingDetailPage() {
   useEffect(() => {
     if (!booking) return;
     if (["pending", "accepted", "in_progress"].includes(booking.status)) {
-      const t = setInterval(fetchBooking, 10000);
+      const t = setInterval(fetchBooking, 5000);
       return () => clearInterval(t);
     }
   }, [booking?.status]);
@@ -173,15 +172,40 @@ export default function BookingDetailPage() {
               </div>
             </div>
 
-            {/* OTP Info — shown when worker has started the job */}
-            {booking.status === "in_progress" && booking.start_otp && (
-              <div className="bg-amber-50 border border-amber-200 rounded-md p-4 space-y-2">
+            {/* OTP Banner — shown to customer when worker has generated it */}
+            {booking.status === 'accepted' && booking.start_otp && (
+              <div className="bg-amber-50 border-2 border-amber-400 rounded-md p-5 space-y-3">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck size={16} className="text-amber-600" />
-                  <p className="text-xs font-bold text-amber-800">Job In Progress — Start OTP</p>
+                  <ShieldCheck size={18} className="text-amber-600" />
+                  <p className="text-sm font-bold text-amber-900">Your worker has arrived!</p>
                 </div>
-                <p className="text-3xl font-mono font-extrabold tracking-[0.3em] text-amber-900">{booking.start_otp}</p>
-                <p className="text-xs text-amber-700">This OTP was used to confirm job start. Keep it for your records.</p>
+                <p className="text-xs text-amber-800 leading-relaxed">
+                  Read this 6-digit code to the worker to start the job:
+                </p>
+                <div className="bg-white border border-amber-300 rounded-sm py-4 px-6 text-center">
+                  <p className="text-4xl font-mono font-extrabold tracking-[0.4em] text-amber-900 select-all">
+                    {booking.start_otp}
+                  </p>
+                </div>
+                <p className="text-[11px] text-amber-700">Do not share this code with anyone else.</p>
+              </div>
+            )}
+
+            {booking.status === 'in_progress' && booking.end_otp && (
+              <div className="bg-emerald-50 border-2 border-emerald-400 rounded-md p-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck size={18} className="text-emerald-600" />
+                  <p className="text-sm font-bold text-emerald-900">Job completion — verify now</p>
+                </div>
+                <p className="text-xs text-emerald-800 leading-relaxed">
+                  Read this 6-digit code to the worker to confirm job completion:
+                </p>
+                <div className="bg-white border border-emerald-300 rounded-sm py-4 px-6 text-center">
+                  <p className="text-4xl font-mono font-extrabold tracking-[0.4em] text-emerald-900 select-all">
+                    {booking.end_otp}
+                  </p>
+                </div>
+                <p className="text-[11px] text-emerald-700">Do not share this code with anyone else.</p>
               </div>
             )}
 

@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Calendar, Clock, MapPin, ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import servicesData from "../../data/services.json";
-
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_BASE_URL } from "@/lib/api";
+import Header from "@/app/components/Header";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -50,22 +50,27 @@ export default function BookingSchedulePage() {
 
   const workerId = searchParams.get("worker_id");
   const serviceId = searchParams.get("action");
-  const amount = searchParams.get("amount");
+  const amount = searchParams.get("amount"); // base per-hour price
 
   const subCategory = servicesData?.subCategories?.find((s) => s.id === serviceId);
   const allSlots = generateTimeSlots();
 
   // Step 1 state
   const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedTime, setSelectedTime] = useState(""); // start hour "HH:00"
+  const [duration, setDuration] = useState(1);          // hours: 1 | 2 | 3 | 4
 
   // Step 2 state
   const [address, setAddress] = useState("");
 
   // UI state
-  const [step, setStep] = useState(1); // 1 = date/time, 2 = address + confirm
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Booked slots state (individual booked hour starts e.g. ["09:00", "10:00"])
+  const [bookedHours, setBookedHours] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   // Unique dates for the date picker row
   const uniqueDates = [...new Set(allSlots.map((s) => s.date))];
@@ -73,15 +78,68 @@ export default function BookingSchedulePage() {
   // Time slots for the selected date
   const timeSlotsForDate = allSlots.filter((s) => s.date === selectedDate);
 
-  const canProceedToStep2 = selectedDate && selectedTime;
+  // Derived: end time based on start + duration
+  const endHour = selectedTime
+    ? String(parseInt(selectedTime.split(":")[0]) + duration).padStart(2, "0") + ":00"
+    : "";
+
+  // Max duration user can select without going past 21:00
+  const maxDuration = selectedTime
+    ? Math.min(4, 21 - parseInt(selectedTime.split(":")[0]))
+    : 4;
+
+  // Check if all hours in [start, start+duration) are free
+  const isRangeAvailable = (startHour, hrs) => {
+    const startH = parseInt(startHour.split(":")[0]);
+    for (let i = 0; i < hrs; i++) {
+      const h = String(startH + i).padStart(2, "0") + ":00";
+      if (bookedHours.includes(h)) return false;
+    }
+    return true;
+  };
+
+  const canProceedToStep2 =
+    selectedDate &&
+    selectedTime &&
+    endHour &&
+    isRangeAvailable(selectedTime, duration);
+
   const canConfirm = address.trim().length > 5;
+
+  // Total amount (per-hour base × duration)
+  const totalAmount = amount ? String(parseInt(amount) * duration) : null;
+
+  // ---------------------------------------------------------------------------
+  // Fetch booked slots whenever worker + date changes
+  // Returns individual occupied hour starts (backend expands ranges)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!workerId || !selectedDate) {
+      setBookedHours([]);
+      return;
+    }
+    setSlotsLoading(true);
+    fetch(`${API_BASE_URL}/bookings/worker-slots?worker_id=${workerId}&date=${selectedDate}`)
+      .then((r) => r.json())
+      .then((data) => setBookedHours(data.booked_hours || []))
+      .catch(() => setBookedHours([]))
+      .finally(() => setSlotsLoading(false));
+  }, [workerId, selectedDate]);
+
+  // When duration changes, re-validate selected start time
+  useEffect(() => {
+    if (selectedTime && !isRangeAvailable(selectedTime, duration)) {
+      setSelectedTime("");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [duration, bookedHours]);
 
   // ---------------------------------------------------------------------------
   // Step 1 → Step 2
   // ---------------------------------------------------------------------------
   const handleNextStep = () => {
     if (!canProceedToStep2) {
-      setError("Please select a date and a time slot.");
+      setError("Please select a date, time slot, and duration.");
       return;
     }
     setError("");
@@ -106,7 +164,7 @@ export default function BookingSchedulePage() {
         return;
       }
 
-      const res = await fetch(`${API}/bookings/book`, {
+      const res = await fetch(`${API_BASE_URL}/bookings/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -116,9 +174,9 @@ export default function BookingSchedulePage() {
           worker_id: parseInt(workerId),
           service_id: serviceId,
           date: selectedDate,
-          time_slot: `${selectedTime}-${timeSlotsForDate.find((s) => s.time === selectedTime)?.endTime || ""}`,
+          time_slot: `${selectedTime}-${endHour}`,
           address: address.trim(),
-          amount: amount,
+          amount: totalAmount,
         }),
       });
 
@@ -135,12 +193,15 @@ export default function BookingSchedulePage() {
     }
   };
 
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
-      {/* Top bar */}
+      <Header />
+
+      {/* Step sub-bar */}
       <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => (step === 2 ? setStep(1) : router.back())}
@@ -195,30 +256,80 @@ export default function BookingSchedulePage() {
             <div className="bg-white rounded-md border border-slate-200 p-4 shadow-2xs space-y-3">
               <div className="flex items-center gap-2 mb-1">
                 <Clock size={15} className="text-[#ff8a4c]" />
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Select Time Slot (1 hr)</span>
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Select Start Time</span>
               </div>
               {!selectedDate ? (
                 <p className="text-xs text-slate-400 py-4 text-center">Select a date first</p>
+              ) : slotsLoading ? (
+                <p className="text-xs text-slate-400 py-4 text-center">Checking availability…</p>
               ) : timeSlotsForDate.length === 0 ? (
                 <p className="text-xs text-slate-400 py-4 text-center">No slots available for today. Pick another day.</p>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {timeSlotsForDate.map((slot) => (
-                    <button
-                      key={slot.time}
-                      onClick={() => setSelectedTime(slot.time)}
-                      className={`py-2.5 text-center rounded-sm border text-xs font-medium transition cursor-pointer ${
-                        selectedTime === slot.time
-                          ? "bg-[#ff8a4c] text-white border-[#ff8a4c]"
-                          : "bg-white border-slate-200 text-slate-700 hover:border-[#ff8a4c]"
-                      }`}
-                    >
-                      {slot.time} – {slot.endTime}
-                    </button>
-                  ))}
+                  {timeSlotsForDate.map((slot) => {
+                    const isBooked = bookedHours.includes(slot.time);
+                    const isBlockedByDuration = !isBooked && !isRangeAvailable(slot.time, duration);
+                    const isUnavailable = isBooked || isBlockedByDuration;
+                    const isSelected = selectedTime === slot.time;
+                    return (
+                      <button
+                        key={slot.time}
+                        onClick={() => !isUnavailable && setSelectedTime(slot.time)}
+                        disabled={isUnavailable}
+                        title={isBooked ? "Already booked" : isBlockedByDuration ? "Not enough consecutive hours available" : ""}
+                        className={`py-2.5 text-center rounded-sm border text-xs font-medium transition ${
+                          isBooked
+                            ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed line-through"
+                            : isBlockedByDuration
+                            ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
+                            : isSelected
+                            ? "bg-[#ff8a4c] text-white border-[#ff8a4c] cursor-pointer"
+                            : "bg-white border-slate-200 text-slate-700 hover:border-[#ff8a4c] cursor-pointer"
+                        }`}
+                      >
+                        {slot.time}
+                        {isBooked && <span className="block text-[10px] leading-tight" style={{textDecoration:"none"}}>Booked</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
+
+            {/* Duration picker — shown once a start time is selected */}
+            {selectedTime && (
+              <div className="bg-white rounded-md border border-slate-200 p-4 shadow-2xs space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock size={15} className="text-[#ff8a4c]" />
+                  <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Duration</span>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  {[1, 2, 3, 4].map((hrs) => {
+                    const disabled = hrs > maxDuration || !isRangeAvailable(selectedTime, hrs);
+                    return (
+                      <button
+                        key={hrs}
+                        onClick={() => !disabled && setDuration(hrs)}
+                        disabled={disabled}
+                        className={`px-4 py-2 rounded-sm border text-xs font-bold transition ${
+                          disabled
+                            ? "bg-slate-100 border-slate-200 text-slate-300 cursor-not-allowed"
+                            : duration === hrs
+                            ? "bg-[#ff8a4c] text-white border-[#ff8a4c] cursor-pointer"
+                            : "bg-white border-slate-200 text-slate-700 hover:border-[#ff8a4c] cursor-pointer"
+                        }`}
+                      >
+                        {hrs} hr{hrs > 1 ? "s" : ""}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-slate-500">
+                  {selectedTime} – {endHour}
+                  {totalAmount && <span className="ml-2 font-bold text-[#ff8a4c]">₹{totalAmount}</span>}
+                </p>
+              </div>
+            )}
 
             {error && <p className="text-red-600 text-xs px-1">{error}</p>}
 
@@ -243,8 +354,10 @@ export default function BookingSchedulePage() {
               <div className="divide-y divide-slate-100">
                 <SummaryRow label="Service" value={subCategory?.label || serviceId} />
                 <SummaryRow label="Date" value={formatDate(selectedDate)} />
-                <SummaryRow label="Time" value={`${selectedTime} – ${timeSlotsForDate.find((s) => s.time === selectedTime)?.endTime}`} />
-                <SummaryRow label="Rate" value={amount ? `₹${amount}` : "—"} highlight />
+                <SummaryRow label="Time" value={`${selectedTime} – ${endHour}`} />
+                <SummaryRow label="Duration" value={`${duration} hr${duration > 1 ? "s" : ""}`} />
+                <SummaryRow label="Rate" value={amount ? `₹${amount}/hr` : "—"} />
+                <SummaryRow label="Total" value={totalAmount ? `₹${totalAmount}` : "—"} highlight />
                 <SummaryRow label="Payment" value="Cash / Offline after job" />
               </div>
             </div>
