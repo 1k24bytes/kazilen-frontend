@@ -10,10 +10,10 @@ function VerifyOtpClient() {
 	const params = useSearchParams();
 	const rawPhone = params.get("phone");
 	const phone = rawPhone ? rawPhone.replace(/\D/g, "") : "";
+	const referralCode = params.get("ref");
 
 	const [otpDigits, setOtpDigits] = useState(["", "", "", "", "", ""]);
 	const [seconds, setSeconds] = useState(30);
-	const [resendEnabled, setResendEnabled] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [resending, setResending] = useState(false);
 	const inputRefs = useRef([]);
@@ -78,7 +78,8 @@ function VerifyOtpClient() {
 			}
 
 			if (data.status === "needs_registration") {
-				router.push(`/register?phone=${encodeURIComponent(cleanPhone)}`);
+				const referralQuery = referralCode ? `&ref=${encodeURIComponent(referralCode)}` : "";
+				router.push(`/register?phone=${encodeURIComponent(cleanPhone)}${referralQuery}`);
 			} else if (data.status === "success" && data.access_token) {
 				localStorage.setItem("access_token", data.access_token);
 				router.push("/");
@@ -108,7 +109,6 @@ function VerifyOtpClient() {
 			}
 
 			setSeconds(30);
-			setResendEnabled(false);
 			setOtpDigits(["", "", "", "", "", ""]);
 			inputRefs.current[0]?.focus();
 		} catch (e) {
@@ -119,10 +119,7 @@ function VerifyOtpClient() {
 	};
 
 	useEffect(() => {
-		if (seconds <= 0) {
-			setResendEnabled(true);
-			return;
-		}
+		if (seconds <= 0) return;
 
 		const timer = setInterval(() => {
 			setSeconds((prev) => prev - 1);
@@ -130,6 +127,8 @@ function VerifyOtpClient() {
 
 		return () => clearInterval(timer);
 	}, [seconds]);
+
+	const resendEnabled = seconds <= 0;
 
 	const formatTime = (sec) => {
 		const min = Math.floor(sec / 60);
@@ -174,7 +173,7 @@ function VerifyOtpClient() {
 
 				<div className="flex justify-between items-center text-xs text-slate-500 pt-1">
 					<span>
-						Didn't receive code?{" "}
+						Didn&apos;t receive code?{" "}
 						<button
 							disabled={!resendEnabled || resending}
 							onClick={handleResend}

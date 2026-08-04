@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_BASE_URL } from "@/lib/api";
 import TermsOfCondition from "./TermsOfCondition";
@@ -12,6 +12,12 @@ export default function LoginPage() {
 	const [showModal, setShowModal] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [acceptedTerms, setAcceptedTerms] = useState(true);
+
+	useEffect(() => {
+		if (localStorage.getItem("access_token")) {
+			router.replace("/");
+		}
+	}, [router]);
 
 	const handleContinue = async () => {
 		if (!acceptedTerms) {
@@ -45,7 +51,11 @@ export default function LoginPage() {
 				return;
 			}
 
-			router.push(`/verify?phone=${encodeURIComponent(phone)}`);
+			const referralCode = typeof window !== "undefined"
+				? new URLSearchParams(window.location.search).get("ref")
+				: null;
+			const referralQuery = referralCode ? `&ref=${encodeURIComponent(referralCode)}` : "";
+			router.push(`/verify?phone=${encodeURIComponent(phone)}${referralQuery}`);
 		} catch (e) {
 			alert(`Failed to check phone: ${e?.message ?? e}`);
 		} finally {
@@ -134,7 +144,7 @@ export default function LoginPage() {
 						htmlFor="terms"
 						className="text-xs text-slate-500 leading-relaxed"
 					>
-						By proceeding, I agree to Kazilen's{" "}
+						By proceeding, I agree to Kazilen&apos;s{" "}
 						<button
 							type="button"
 							onClick={() => setShowModal(true)}
