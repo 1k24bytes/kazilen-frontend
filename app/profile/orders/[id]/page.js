@@ -13,6 +13,7 @@ import {
   User,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
+import CompletionReviewModal from "@/app/components/CompletionReviewModal";
 
 const STATUS_STEPS = ["pending", "accepted", "in_progress", "completed"];
 
@@ -53,6 +54,8 @@ export default function BookingDetailPage() {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reviewStatus, setReviewStatus] = useState(null);
+  const [reviewClosed, setReviewClosed] = useState(false);
 
   const fetchBooking = async () => {
     const token = localStorage.getItem("access_token");
@@ -79,6 +82,17 @@ export default function BookingDetailPage() {
   useEffect(() => {
     if (bookingId) fetchBooking();
   }, [bookingId]);
+
+  useEffect(() => {
+    if (!bookingId || booking?.status !== "completed") return;
+    const token = localStorage.getItem("access_token");
+    fetch(`${API_BASE_URL}/reviews/bookings/${bookingId}/status`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => data && setReviewStatus(data))
+      .catch(() => {});
+  }, [bookingId, booking?.status]);
 
   // Auto-refresh every 10s when job is in flight
   useEffect(() => {
@@ -229,6 +243,15 @@ export default function BookingDetailPage() {
                 </div>
               </div>
             )}
+
+            {booking.status === "completed" && reviewStatus && !reviewClosed &&
+              (!reviewStatus.participant_review_submitted || !reviewStatus.platform_feedback_submitted) && (
+                <CompletionReviewModal
+                  bookingId={bookingId}
+                  initialStatus={reviewStatus}
+                  onComplete={() => setReviewClosed(true)}
+                />
+              )}
 
             {/* Pending hint */}
             {booking.status === "pending" && (

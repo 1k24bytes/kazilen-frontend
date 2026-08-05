@@ -35,7 +35,7 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 		<>
 			<button
 				onClick={() => setShowProfile(true)}
-				className="px-3.5 py-2 text-xs font-bold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer"
+				className="px-3.5 py-2 text-xs font-bold rounded-sm bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer"
 			>
 				View details
 			</button>
@@ -48,14 +48,14 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 				>
 					<div 
 						onClick={(e) => e.stopPropagation()}
-						className="bg-white rounded-2xl border border-slate-200 w-full max-w-md p-6 text-slate-900 space-y-5 shadow-xl relative animate-in fade-in zoom-in-95 duration-150"
+						className="bg-white rounded-md border border-slate-200 w-full max-w-md p-6 text-slate-900 space-y-5 shadow-xl relative"
 					>
 						{/* Header */}
 						<div className="flex justify-between items-center pb-3 border-b border-slate-100">
 							<h3 className="font-bold text-slate-900 text-base">Technician Details</h3>
 							<button
 								onClick={() => setShowProfile(false)}
-								className="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500 flex items-center justify-center transition cursor-pointer"
+								className="w-8 h-8 rounded-sm hover:bg-slate-100 text-slate-500 flex items-center justify-center transition cursor-pointer"
 								aria-label="Close modal"
 							>
 								<X className="w-5 h-5" />
@@ -63,8 +63,8 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 						</div>
 
 						{/* Technician Summary Card */}
-						<div className="flex items-center gap-3.5 p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-							<div className="w-12 h-12 rounded-xl bg-[#ff8a4c] text-white font-bold text-lg flex items-center justify-center shrink-0">
+						<div className="flex items-center gap-3.5 p-4 rounded-md bg-slate-50 border border-slate-200/80">
+							<div className="w-12 h-12 rounded-md bg-[#ff8a4c] text-white font-bold text-lg flex items-center justify-center shrink-0">
 								{name.charAt(0).toUpperCase()}
 							</div>
 							<div className="min-w-0 flex-1">
@@ -72,7 +72,7 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 									<h4 className="text-sm font-bold text-slate-900 truncate">
 										{name}
 									</h4>
-									<span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 shrink-0">
+									<span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-sm border border-emerald-200 shrink-0">
 										<ShieldCheck size={11} /> Verified
 									</span>
 								</div>
@@ -83,7 +83,7 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 						</div>
 
 						{/* Service & Price Box */}
-						<div className="p-4 bg-slate-50/50 rounded-xl border border-slate-200/80 flex items-center justify-between">
+						<div className="p-4 bg-slate-50/50 rounded-md border border-slate-200/80 flex items-center justify-between">
 							<div>
 								<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Service</span>
 								<p className="text-sm font-bold text-slate-900 capitalize">
@@ -101,7 +101,7 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 						{/* Action Button */}
 						<button
 							onClick={handleBookNow}
-							className="w-full bg-[#ff8a4c] hover:bg-[#f07432] text-white font-bold py-3 rounded-xl text-sm shadow-2xs transition cursor-pointer active:scale-98"
+							className="w-full bg-[#ff8a4c] hover:bg-[#f07432] text-white font-bold py-3 rounded-sm text-sm shadow-2xs transition cursor-pointer active:scale-98"
 						>
 							Book Now
 						</button>

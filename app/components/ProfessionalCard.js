@@ -67,10 +67,15 @@ export default function ProfessionalCard({ professional, subCategory }) {
 						</p>
 					</div>
 
-					<div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shrink-0">
-						<Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-						<span>{professional.rating || "4.9"}</span>
-					</div>
+					{professional.rating && Number(professional.rating) > 0 && professional.reviews_count !== 0 ? (
+						<div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shrink-0">
+							<Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+							<span>{Number(professional.rating).toFixed(1)}</span>
+							{professional.reviews_count > 0 && (
+								<span className="text-[10px] font-normal text-amber-700">({professional.reviews_count})</span>
+							)}
+						</div>
+					) : null}
 				</div>
 			</div>
 
