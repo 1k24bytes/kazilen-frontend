@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle } from "lucide-react";
+import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import Header from "@/app/components/Header";
@@ -58,6 +58,8 @@ export default function OrdersPage() {
     };
 
     fetchBookings();
+    const interval = setInterval(fetchBookings, 4000);
+    return () => clearInterval(interval);
   }, [router]);
 
   return (
@@ -112,35 +114,68 @@ export default function OrdersPage() {
           </div>
         )}
 
-        {!loading && bookings.map((booking) => (
-          <Link key={booking.id} href={`/profile/orders/${booking.id}`}>
-            <div className="bg-white rounded-md border border-slate-200 shadow-2xs p-4 hover:border-slate-300 transition cursor-pointer">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-900 truncate">
-                      {booking.service_id?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
-                    </span>
-                    <StatusBadge status={booking.status} />
+        {!loading && bookings.map((booking) => {
+          const hasStartOtp = booking.status === "accepted" && booking.start_otp;
+          const hasEndOtp = booking.status === "in_progress" && booking.end_otp;
+          const activeOtp = hasStartOtp ? booking.start_otp : hasEndOtp ? booking.end_otp : null;
+
+          return (
+            <Link key={booking.id} href={`/profile/orders/${booking.id}`}>
+              <div className="bg-white rounded-md border border-slate-200 shadow-2xs p-4 hover:border-slate-300 transition cursor-pointer space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900 truncate">
+                        {booking.service_id?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
+                      </span>
+                      <StatusBadge status={booking.status} />
+                    </div>
+                    <p className="text-xs text-slate-500 flex items-center gap-1">
+                      <Clock size={11} className="shrink-0" />
+                      {booking.date} · {booking.time_slot}
+                    </p>
+                    {booking.address && (
+                      <p className="text-xs text-slate-500 truncate">{booking.address}</p>
+                    )}
                   </div>
-                  <p className="text-xs text-slate-500 flex items-center gap-1">
-                    <Clock size={11} className="shrink-0" />
-                    {booking.date} · {booking.time_slot}
-                  </p>
-                  {booking.address && (
-                    <p className="text-xs text-slate-500 truncate">{booking.address}</p>
-                  )}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    {booking.amount && (
+                      <span className="text-sm font-extrabold text-slate-900">₹{booking.amount}</span>
+                    )}
+                    <ChevronRight size={15} className="text-slate-400" />
+                  </div>
                 </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
-                  {booking.amount && (
-                    <span className="text-sm font-extrabold text-slate-900">₹{booking.amount}</span>
-                  )}
-                  <ChevronRight size={15} className="text-slate-400" />
-                </div>
+
+                {activeOtp && (
+                  <div
+                    className={`rounded-sm p-3 border flex items-center justify-between gap-3 ${
+                      hasStartOtp
+                        ? "bg-amber-50/80 border-amber-300 text-amber-900"
+                        : "bg-emerald-50/80 border-emerald-300 text-emerald-900"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <ShieldCheck size={16} className={hasStartOtp ? "text-amber-600" : "text-emerald-600"} />
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-bold">
+                          {hasStartOtp ? "Start OTP (Technician Arrived):" : "Completion OTP (Job Done):"}
+                        </p>
+                        <p className="text-[10px] text-slate-600 truncate">
+                          Read this 6-digit code to technician
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-white border border-slate-300 rounded-sm px-3 py-1 text-center shrink-0">
+                      <span className="text-base font-mono font-extrabold tracking-[0.25em] text-slate-900">
+                        {activeOtp}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
 
       </div>
     </div>

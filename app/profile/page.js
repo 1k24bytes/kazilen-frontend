@@ -24,6 +24,25 @@ export default function ProfilePage() {
   const router = useRouter()
   const [referral, setReferral] = useState({ code: '', points: 0 })
   const [copied, setCopied] = useState(false)
+  const [activeOtpBookings, setActiveOtpBookings] = useState([])
+  const [copiedOtp, setCopiedOtp] = useState(null)
+
+  const fetchActiveBookings = async (token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/bookings/my`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const active = (data.bookings || []).filter(
+          (b) => (b.status === 'accepted' && b.start_otp) || (b.status === 'in_progress' && b.end_otp)
+        )
+        setActiveOtpBookings(active)
+      }
+    } catch (e) {
+      console.error('Failed to fetch active bookings:', e)
+    }
+  }
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
@@ -39,7 +58,21 @@ export default function ProfilePage() {
         }
       })
       .catch((error) => console.error('Failed to load referral details:', error))
+
+    fetchActiveBookings(token)
+    const interval = setInterval(() => {
+      fetchActiveBookings(token)
+    }, 4000)
+
+    return () => clearInterval(interval)
   }, [])
+
+  const handleCopyOtp = async (otp, id) => {
+    if (!otp) return
+    await navigator.clipboard.writeText(otp)
+    setCopiedOtp(id)
+    setTimeout(() => setCopiedOtp(null), 2000)
+  }
 
   const referralLink = referral.code && typeof window !== 'undefined'
     ? `${window.location.origin}/login?ref=${encodeURIComponent(referral.code)}`
@@ -81,6 +114,96 @@ export default function ProfilePage() {
             <p className="text-xs text-slate-500 mt-0.5">Manage your Kazilen service bookings & preferences</p>
           </div>
         </div>
+
+        {/* Active Service OTP Banners (Job Start / Completion) */}
+        {activeOtpBookings.length > 0 && (
+          <div className="space-y-4">
+            {activeOtpBookings.map((b) => {
+              const isStart = b.status === 'accepted' && b.start_otp
+              const isEnd = b.status === 'in_progress' && b.end_otp
+              const activeOtp = isStart ? b.start_otp : b.end_otp
+              const formattedService = b.service_id?.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
+              return (
+                <div
+                  key={b.id}
+                  className={`rounded-md border p-5 shadow-2xs ${
+                    isStart
+                      ? 'bg-amber-50/70 border-amber-300'
+                      : 'bg-emerald-50/70 border-emerald-300'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/60">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-sm border ${
+                          isStart
+                            ? 'bg-amber-100 text-amber-800 border-amber-300'
+                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                        }`}
+                      >
+                        <ShieldCheck size={12} />
+                        {isStart ? 'Job Start Verification' : 'Job Completion Verification'}
+                      </span>
+                      <span className="text-xs font-bold text-slate-800">
+                        Booking #{b.id}
+                      </span>
+                    </div>
+                    <span className="text-xs font-medium text-slate-600">
+                      {formattedService} ({b.date} · {b.time_slot})
+                    </span>
+                  </div>
+
+                  <div className="my-4 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-600">
+                        {isStart ? '6-Digit Start OTP' : '6-Digit Completion OTP'}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {isStart
+                          ? 'Read this code to your technician to start the service.'
+                          : 'Read this code to your technician to confirm job completion.'}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <div className="bg-white border border-slate-300 rounded-sm px-5 py-2.5 text-center shadow-2xs">
+                        <span className="text-2xl sm:text-3xl font-mono font-extrabold tracking-[0.35em] text-slate-900 select-all">
+                          {activeOtp}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleCopyOtp(activeOtp, b.id)}
+                        className="px-3 py-3 rounded-sm bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs font-bold transition flex items-center gap-1 shadow-2xs"
+                        title="Copy OTP"
+                      >
+                        {copiedOtp === b.id ? (
+                          <Check size={15} className="text-emerald-600" />
+                        ) : (
+                          <Copy size={15} />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+                    <p className="text-[11px] text-slate-500">
+                      Secure in-portal verification. Do not share with unauthorized persons.
+                    </p>
+                    <button
+                      onClick={() => router.push(`/profile/orders/${b.id}`)}
+                      className="text-xs font-bold text-[#ff8a4c] hover:text-[#f07432] flex items-center gap-1"
+                    >
+                      <span>Booking Details</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
 
         {/* Settings Grid */}
         <div className="bg-white rounded-md border border-slate-200 shadow-xs divide-y divide-slate-100 overflow-hidden">

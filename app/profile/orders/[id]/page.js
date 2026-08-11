@@ -11,6 +11,8 @@ import {
   AlertCircle,
   ShieldCheck,
   User,
+  Copy,
+  Check,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 import CompletionReviewModal from "@/app/components/CompletionReviewModal";
@@ -56,6 +58,14 @@ export default function BookingDetailPage() {
   const [error, setError] = useState("");
   const [reviewStatus, setReviewStatus] = useState(null);
   const [reviewClosed, setReviewClosed] = useState(false);
+  const [copiedOtp, setCopiedOtp] = useState(false);
+
+  const handleCopyOtp = async (otp) => {
+    if (!otp) return;
+    await navigator.clipboard.writeText(otp);
+    setCopiedOtp(true);
+    setTimeout(() => setCopiedOtp(false), 2000);
+  };
 
   const fetchBooking = async () => {
     const token = localStorage.getItem("access_token");
@@ -188,38 +198,72 @@ export default function BookingDetailPage() {
 
             {/* OTP Banner — shown to customer when worker has generated it */}
             {booking.status === 'accepted' && booking.start_otp && (
-              <div className="bg-amber-50 border-2 border-amber-400 rounded-md p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-amber-600" />
-                  <p className="text-sm font-bold text-amber-900">Your worker has arrived!</p>
+              <div className="bg-amber-50 border border-amber-300 rounded-md p-5 space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={18} className="text-amber-600" />
+                    <p className="text-sm font-bold text-amber-900">Technician has arrived!</p>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 px-2 py-0.5 rounded-sm border border-amber-300">
+                    Start Code
+                  </span>
                 </div>
                 <p className="text-xs text-amber-800 leading-relaxed">
-                  Read this 6-digit code to the worker to start the job:
+                  Read this 6-digit code to the technician to authorize and start the job:
                 </p>
-                <div className="bg-white border border-amber-300 rounded-sm py-4 px-6 text-center">
-                  <p className="text-4xl font-mono font-extrabold tracking-[0.4em] text-amber-900 select-all">
-                    {booking.start_otp}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-white border border-amber-300 rounded-sm py-3 px-4 text-center">
+                    <p className="text-3xl sm:text-4xl font-mono font-black tracking-[0.35em] text-amber-900 select-all">
+                      {booking.start_otp}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyOtp(booking.start_otp)}
+                    className="p-3 bg-white border border-amber-300 rounded-sm hover:bg-amber-100 text-amber-900 transition flex items-center justify-center shrink-0"
+                    title="Copy OTP"
+                  >
+                    {copiedOtp ? <Check size={18} className="text-emerald-600" /> : <Copy size={18} />}
+                  </button>
                 </div>
-                <p className="text-[11px] text-amber-700">Do not share this code with anyone else.</p>
+                <p className="text-[11px] text-amber-700">
+                  Secure in-portal verification. Do not share this code with anyone else.
+                </p>
               </div>
             )}
 
             {booking.status === 'in_progress' && booking.end_otp && (
-              <div className="bg-emerald-50 border-2 border-emerald-400 rounded-md p-5 space-y-3">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck size={18} className="text-emerald-600" />
-                  <p className="text-sm font-bold text-emerald-900">Job completion — verify now</p>
+              <div className="bg-emerald-50 border border-emerald-300 rounded-md p-5 space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={18} className="text-emerald-600" />
+                    <p className="text-sm font-bold text-emerald-900">Job completion verification</p>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-sm border border-emerald-300">
+                    Completion Code
+                  </span>
                 </div>
                 <p className="text-xs text-emerald-800 leading-relaxed">
-                  Read this 6-digit code to the worker to confirm job completion:
+                  Read this 6-digit code to the technician to confirm job completion:
                 </p>
-                <div className="bg-white border border-emerald-300 rounded-sm py-4 px-6 text-center">
-                  <p className="text-4xl font-mono font-extrabold tracking-[0.4em] text-emerald-900 select-all">
-                    {booking.end_otp}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 bg-white border border-emerald-300 rounded-sm py-3 px-4 text-center">
+                    <p className="text-3xl sm:text-4xl font-mono font-black tracking-[0.35em] text-emerald-900 select-all">
+                      {booking.end_otp}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyOtp(booking.end_otp)}
+                    className="p-3 bg-white border border-emerald-300 rounded-sm hover:bg-emerald-100 text-emerald-900 transition flex items-center justify-center shrink-0"
+                    title="Copy OTP"
+                  >
+                    {copiedOtp ? <Check size={18} className="text-emerald-600" /> : <Copy size={18} />}
+                  </button>
                 </div>
-                <p className="text-[11px] text-emerald-700">Do not share this code with anyone else.</p>
+                <p className="text-[11px] text-emerald-700">
+                  Secure in-portal verification. Do not share this code with anyone else.
+                </p>
               </div>
             )}
 
