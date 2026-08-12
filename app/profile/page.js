@@ -2,6 +2,7 @@
 
 import Header from '../components/Header'
 import BackHeader from './components/BackHeader'
+import PlatformFeedbackModal from './components/PlatformFeedbackModal'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -16,7 +17,8 @@ import {
   ShieldCheck,
   Copy,
   Check,
-  Gift
+  Gift,
+  HeartHandshake,
 } from 'lucide-react'
 import { API_BASE_URL } from '@/lib/api'
 
@@ -26,6 +28,8 @@ export default function ProfilePage() {
   const [copied, setCopied] = useState(false)
   const [activeOtpBookings, setActiveOtpBookings] = useState([])
   const [copiedOtp, setCopiedOtp] = useState(null)
+  const [platformFeedback, setPlatformFeedback] = useState(null)
+  const [showPlatformModal, setShowPlatformModal] = useState(false)
 
   const fetchActiveBookings = async (token) => {
     try {
@@ -41,6 +45,22 @@ export default function ProfilePage() {
       }
     } catch (e) {
       console.error('Failed to fetch active bookings:', e)
+    }
+  }
+
+  const fetchPlatformFeedback = async (token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/reviews/platform/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.submitted && data.feedback) {
+          setPlatformFeedback(data.feedback)
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load platform feedback:', e)
     }
   }
 
@@ -60,6 +80,7 @@ export default function ProfilePage() {
       .catch((error) => console.error('Failed to load referral details:', error))
 
     fetchActiveBookings(token)
+    fetchPlatformFeedback(token)
     const interval = setInterval(() => {
       fetchActiveBookings(token)
     }, 4000)
@@ -222,6 +243,18 @@ export default function ProfilePage() {
           />
 
           <ProfileItem
+            icon={<HeartHandshake size={18} className="text-[#ff8a4c]" />}
+            label="Rate Kazilen Platform"
+            sub={
+              platformFeedback
+                ? `You rated Kazilen ${platformFeedback.rating}★ · Click to view or edit`
+                : "One-time overall feedback for the Kazilen platform"
+            }
+            badge={platformFeedback ? `${platformFeedback.rating}★ Submitted` : undefined}
+            onClick={() => setShowPlatformModal(true)}
+          />
+
+          <ProfileItem
             icon={<ClipboardList size={18} className="text-[#ff8a4c]" />}
             label="Booking History & Orders"
             sub="View active and completed service requests"
@@ -272,7 +305,7 @@ export default function ProfilePage() {
               type="button"
               onClick={copyReferralLink}
               disabled={!referralLink}
-              className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-sm bg-[#ff8a4c] hover:bg-[#f07432] text-white text-xs font-bold transition disabled:bg-slate-200 disabled:text-slate-400"
+              className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-sm bg-[#ff8a4c] hover:bg-[#f07432] text-white text-xs font-bold transition disabled:bg-slate-200 disabled:text-slate-400 cursor-pointer"
             >
               {copied ? <Check size={15} /> : <Copy size={15} />}
               {copied ? 'Copied' : 'Copy invite link'}
@@ -294,28 +327,46 @@ export default function ProfilePage() {
           </button>
         </div>
       </main>
+
+      {/* One-Time Platform Feedback Modal */}
+      {showPlatformModal && (
+        <PlatformFeedbackModal
+          initialFeedback={platformFeedback}
+          onClose={() => setShowPlatformModal(false)}
+          onSaved={(feedback) => {
+            setPlatformFeedback(feedback)
+          }}
+        />
+      )}
     </div>
   )
 }
 
-function ProfileItem({ icon, label, sub, onClick }) {
+function ProfileItem({ icon, label, sub, badge, onClick }) {
   return (
     <button
       onClick={onClick}
       className="w-full flex items-center justify-between px-5 py-4 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-800 transition cursor-pointer group"
     >
-      <div className="flex items-center gap-3.5">
-        <div className="p-2 rounded-sm bg-slate-100/80 group-hover:bg-[#fff4ed] transition-colors">
+      <div className="flex items-center gap-3.5 min-w-0">
+        <div className="p-2 rounded-sm bg-slate-100/80 group-hover:bg-[#fff4ed] transition-colors shrink-0">
           {icon}
         </div>
-        <div className="text-left">
-          <span className="block font-bold text-slate-900 text-sm group-hover:text-[#ff8a4c] transition-colors">
-            {label}
-          </span>
-          {sub && <span className="text-xs font-normal text-slate-500">{sub}</span>}
+        <div className="text-left min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="block font-bold text-slate-900 text-sm group-hover:text-[#ff8a4c] transition-colors truncate">
+              {label}
+            </span>
+            {badge && (
+              <span className="inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold rounded-sm bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                {badge}
+              </span>
+            )}
+          </div>
+          {sub && <span className="text-xs font-normal text-slate-500 block truncate">{sub}</span>}
         </div>
       </div>
-      <ChevronRight size={18} className="text-slate-400 group-hover:text-[#ff8a4c] transition-colors" />
+      <ChevronRight size={18} className="text-slate-400 group-hover:text-[#ff8a4c] transition-colors shrink-0" />
     </button>
   )
 }
