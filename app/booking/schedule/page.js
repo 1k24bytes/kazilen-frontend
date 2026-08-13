@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Calendar, Clock, MapPin, ArrowLeft, ArrowRight, CheckCircle2, Zap, ShieldCheck, LocateFixed } from "lucide-react";
+import { Calendar, Clock, MapPin, ArrowLeft, ArrowRight, CheckCircle2, Zap, ShieldCheck, LocateFixed, AlertCircle } from "lucide-react";
 import servicesData from "../../data/services.json";
 import { API_BASE_URL } from "@/lib/api";
 import Header from "@/app/components/Header";
@@ -123,6 +123,9 @@ export default function BookingSchedulePage() {
   // Booked slots state
   const [bookedHours, setBookedHours] = useState([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
+  const [isDayOff, setIsDayOff] = useState(false);
+  const [dayOffName, setDayOffName] = useState("");
+  const [deadHours, setDeadHours] = useState([]);
 
   // Unique dates for the date picker row
   const uniqueDates = [...new Set(allSlots.map((s) => s.date))];
@@ -152,7 +155,7 @@ export default function BookingSchedulePage() {
 
   const canProceedToStep2 =
     bookingMode === "asap" ||
-    (selectedDate && selectedTime && endHour && isRangeAvailable(selectedTime, duration));
+    (!isDayOff && selectedDate && selectedTime && endHour && isRangeAvailable(selectedTime, duration));
 
   const canConfirm = address.trim().length > 5;
 
@@ -169,13 +172,26 @@ export default function BookingSchedulePage() {
   useEffect(() => {
     if (!workerId || !selectedDate || bookingMode !== "scheduled") {
       setBookedHours([]);
+      setIsDayOff(false);
+      setDayOffName("");
+      setDeadHours([]);
       return;
     }
     setSlotsLoading(true);
     fetch(`${API_BASE_URL}/bookings/worker-slots?worker_id=${workerId}&date=${selectedDate}`)
       .then((r) => r.json())
-      .then((data) => setBookedHours(data.booked_hours || []))
-      .catch(() => setBookedHours([]))
+      .then((data) => {
+        setBookedHours(data.booked_hours || []);
+        setIsDayOff(Boolean(data.is_day_off));
+        setDayOffName(data.day_off_name || "");
+        setDeadHours(data.dead_hours || []);
+      })
+      .catch(() => {
+        setBookedHours([]);
+        setIsDayOff(false);
+        setDayOffName("");
+        setDeadHours([]);
+      })
       .finally(() => setSlotsLoading(false));
   }, [workerId, selectedDate, bookingMode]);
 
@@ -398,20 +414,38 @@ export default function BookingSchedulePage() {
 
                 {/* Time slot picker */}
                 <div className="bg-white rounded-md border border-slate-200 p-4 shadow-2xs space-y-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Clock size={15} className="text-[#ff8a4c]" />
-                    <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Select Start Time</span>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <Clock size={15} className="text-[#ff8a4c]" />
+                      <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Select Start Time</span>
+                    </div>
+                    {deadHours.length > 0 && !isDayOff && (
+                      <span className="text-[10px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-sm">
+                        Technician Break Hours Masked
+                      </span>
+                    )}
                   </div>
                   {!selectedDate ? (
                     <p className="text-xs text-slate-400 py-4 text-center">Select a date first</p>
                   ) : slotsLoading ? (
                     <p className="text-xs text-slate-400 py-4 text-center">Checking availability…</p>
+                  ) : isDayOff ? (
+                    <div className="p-4 rounded-sm bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium space-y-1.5">
+                      <div className="flex items-center gap-2 font-bold text-amber-900">
+                        <AlertCircle size={16} className="text-amber-600 shrink-0" />
+                        <span>Technician Scheduled Day Off</span>
+                      </div>
+                      <p className="text-slate-600 text-[11px] leading-relaxed">
+                        This service partner is off on {dayOffName || "this day"} and not taking bookings. Please pick another date above to view open dispatch slots.
+                      </p>
+                    </div>
                   ) : timeSlotsForDate.length === 0 ? (
                     <p className="text-xs text-slate-400 py-4 text-center">No slots available for this day. Pick another day.</p>
                   ) : (
                     <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                       {timeSlotsForDate.map((slot) => {
                         const isBooked = bookedHours.includes(slot.time);
+                        const isDead = deadHours.includes(slot.time);
                         const isBlockedByDuration = !isBooked && !isRangeAvailable(slot.time, duration);
                         const isUnavailable = isBooked || isBlockedByDuration;
                         const isSelected = selectedTime === slot.time;
@@ -420,9 +454,11 @@ export default function BookingSchedulePage() {
                             key={slot.time}
                             onClick={() => !isUnavailable && setSelectedTime(slot.time)}
                             disabled={isUnavailable}
-                            title={isBooked ? "Already booked" : isBlockedByDuration ? "Not enough consecutive hours available" : ""}
+                            title={isDead ? "Technician scheduled break / off-hours" : isBooked ? "Already booked" : isBlockedByDuration ? "Not enough consecutive hours available" : ""}
                             className={`py-2.5 text-center rounded-sm border text-xs font-medium transition ${
-                              isBooked
+                              isDead
+                                ? "bg-amber-50/70 border-amber-200 text-amber-800 cursor-not-allowed"
+                                : isBooked
                                 ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed line-through"
                                 : isBlockedByDuration
                                 ? "bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed"
@@ -432,7 +468,11 @@ export default function BookingSchedulePage() {
                             }`}
                           >
                             {slot.time}
-                            {isBooked && <span className="block text-[10px] leading-tight" style={{ textDecoration: "none" }}>Booked</span>}
+                            {isDead ? (
+                              <span className="block text-[9px] font-bold text-amber-700 leading-tight">Break / Off</span>
+                            ) : isBooked ? (
+                              <span className="block text-[10px] leading-tight" style={{ textDecoration: "none" }}>Booked</span>
+                            ) : null}
                           </button>
                         );
                       })}
