@@ -13,6 +13,7 @@ import {
   User,
   Copy,
   Check,
+  Zap,
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 import CompletionReviewModal from "@/app/components/CompletionReviewModal";
@@ -271,7 +272,17 @@ export default function BookingDetailPage() {
             <div className="bg-white rounded-md border border-slate-200 shadow-2xs p-4">
               <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Details</p>
               <InfoRow icon={<User size={15} />} label="Service" value={serviceLabel} />
+              {(booking.time_slot?.toUpperCase().includes("ASAP") || booking.time_slot?.toUpperCase().includes("INSTANT")) && (
+                <InfoRow
+                  icon={<Zap size={15} className="text-amber-600" />}
+                  label="Dispatch Mode"
+                  value="Instant ASAP (Arrive in 30-45 mins)"
+                />
+              )}
               <InfoRow icon={<Clock size={15} />} label="Date & Time" value={`${booking.date} · ${booking.time_slot}`} />
+              {booking.amount && (
+                <InfoRow icon={<CheckCircle2 size={15} />} label="Total Amount" value={`₹${booking.amount}`} />
+              )}
               <InfoRow icon={<MapPin size={15} />} label="Address" value={booking.address} />
             </div>
 
@@ -299,7 +310,7 @@ export default function BookingDetailPage() {
             {/* Pending hint */}
             {booking.status === "pending" && (
               <div className="bg-slate-50 border border-slate-200 rounded-md p-4 text-xs text-slate-500 leading-relaxed">
-                Your booking has been received. A worker will accept it shortly and you'll see the status update here automatically.
+                Your booking has been received. A worker will accept it shortly and you&apos;ll see the status update here automatically.
               </div>
             )}
           </>

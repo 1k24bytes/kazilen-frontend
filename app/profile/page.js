@@ -24,6 +24,7 @@ import { API_BASE_URL } from '@/lib/api'
 
 export default function ProfilePage() {
   const router = useRouter()
+  const [userProfile, setUserProfile] = useState({ full_name: '', phone_number: '', role: 'customer' })
   const [referral, setReferral] = useState({ code: '', points: 0 })
   const [copied, setCopied] = useState(false)
   const [activeOtpBookings, setActiveOtpBookings] = useState([])
@@ -66,6 +67,13 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const token = localStorage.getItem('access_token')
+    const savedName = localStorage.getItem('kazilen_professional_name') || localStorage.getItem('userName') || localStorage.getItem('user_name') || ''
+    const savedPhone = localStorage.getItem('user_phone') || localStorage.getItem('phone') || ''
+
+    if (savedName || savedPhone) {
+      setUserProfile({ full_name: savedName, phone_number: savedPhone, role: 'customer' })
+    }
+
     if (!token) return
 
     fetch(`${API_BASE_URL}/users/me`, {
@@ -74,10 +82,17 @@ export default function ProfilePage() {
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
         if (data) {
+          setUserProfile({
+            full_name: data.full_name || savedName || '',
+            phone_number: data.phone_number || savedPhone || '',
+            role: data.role || 'customer'
+          })
+          if (data.full_name) localStorage.setItem('kazilen_professional_name', data.full_name)
+          if (data.phone_number) localStorage.setItem('user_phone', data.phone_number)
           setReferral({ code: data.referral_code || '', points: data.referral_points || 0 })
         }
       })
-      .catch((error) => console.error('Failed to load referral details:', error))
+      .catch((error) => console.error('Failed to load user details:', error))
 
     fetchActiveBookings(token)
     fetchPlatformFeedback(token)
@@ -113,27 +128,49 @@ export default function ProfilePage() {
     window.location.href = '/login'
   }
 
+  const displayName = userProfile.full_name?.trim() || 'Customer Account'
+  const initial = (userProfile.full_name?.trim() || 'K').charAt(0).toUpperCase()
+  const formatPhone = (raw) => {
+    if (!raw) return ''
+    let clean = raw.replace(/\D/g, '')
+    if (clean.length > 10 && clean.startsWith('91')) {
+      clean = clean.substring(2)
+    }
+    return clean ? `+91 ${clean}` : ''
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col font-sans">
       <Header />
-      <BackHeader title="Customer Account" />
+      <BackHeader title={displayName} />
 
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-8 w-full space-y-6">
         
         {/* User Card */}
-        <div className="bg-white rounded-md border border-slate-200 p-6 shadow-xs flex items-center gap-4">
-          <div className="w-14 h-14 rounded-md bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-xl shadow-md shadow-orange-500/20 shrink-0">
-            K
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-bold text-slate-900 truncate">Customer Account</h2>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-sm border border-emerald-200">
-                <ShieldCheck size={11} /> Verified
-              </span>
+        <div className="bg-white rounded-md border border-slate-200 p-6 shadow-xs flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-14 h-14 rounded-md bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-xl shadow-md shadow-orange-500/20 shrink-0">
+              {initial}
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">Manage your Kazilen service bookings & preferences</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-bold text-slate-900 truncate">{displayName}</h2>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-sm border border-emerald-200">
+                  <ShieldCheck size={11} /> Verified Customer
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 mt-0.5 truncate">
+                {userProfile.phone_number ? `${formatPhone(userProfile.phone_number)} · ` : ''}Manage your Kazilen service bookings & preferences
+              </p>
+            </div>
           </div>
+
+          <button
+            onClick={() => router.push('/profile/user')}
+            className="px-3.5 py-2 rounded-sm border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition shrink-0 cursor-pointer"
+          >
+            Edit Profile
+          </button>
         </div>
 
         {/* Active Service OTP Banners (Job Start / Completion) */}

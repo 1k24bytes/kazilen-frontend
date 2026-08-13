@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { X, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-export default function ViewDetailsButton({ professional, subCategory, price }) {
+export default function ViewDetailsButton({ professional, subCategory, price, priceType = "hourly", priceUnit = "/ hr" }) {
 	const router = useRouter();
 	const [showProfile, setShowProfile] = useState(false);
 
@@ -27,7 +27,7 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 		router.push(
 			`/booking/schedule?worker_id=${professional?.id || ""}&action=${encodeURIComponent(
 				subCategory || "consult"
-			)}&amount=${price || 150}`
+			)}&amount=${price || 150}&price_type=${priceType}`
 		);
 	};
 
@@ -93,7 +93,7 @@ export default function ViewDetailsButton({ professional, subCategory, price }) 
 							<div className="text-right">
 								<span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Rate</span>
 								<p className="text-xl font-extrabold text-slate-900">
-									₹{price || 150}
+									₹{price || 150} <span className="text-xs font-semibold text-slate-500">{priceUnit}</span>
 								</p>
 							</div>
 						</div>

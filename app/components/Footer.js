@@ -18,7 +18,7 @@ export default function Footer() {
               <span className="text-xl font-bold text-white tracking-tight">Kazilen</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Nagpur's most trusted platform for instant, background-verified home services and repair professionals.
+              Nagpur&apos;s most trusted platform for instant, background-verified home services and repair professionals.
             </p>
             <div className="flex items-center gap-2 text-xs text-[#ff8a4c]">
               <ShieldCheck size={16} />

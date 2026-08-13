@@ -25,14 +25,27 @@ export default function ProfessionalCard({ professional, subCategory }) {
 
 	let price = 199;
 	let priceUnit = "/ hr";
+	let priceType = "hourly";
 
 	if (customService) {
-		const isDaily = customService.price_type === "daily" || (!customService.price_per_hour && customService.price_per_day);
-		price = customService.price || (isDaily ? customService.price_per_day : customService.price_per_hour) || 199;
-		priceUnit = isDaily ? "/ day" : "/ hr";
+		const isFixed =
+			customService.price_type === "fixed" ||
+			(!customService.price_per_hour && (customService.fixed_price || customService.price_per_day));
+		price =
+			customService.price ||
+			(isFixed ? (customService.fixed_price || customService.price_per_day) : customService.price_per_hour) ||
+			(isFixed ? 249 : 199);
+		priceType = isFixed ? "fixed" : "hourly";
+		priceUnit = isFixed ? "Fixed" : "/ hr";
 	} else if (foundSubCategory) {
-		price = foundSubCategory.default_price_per_hour || foundSubCategory.price || 199;
-		priceUnit = "/ hr";
+		const isFixed =
+			foundSubCategory.default_price_type === "fixed" ||
+			Boolean(foundSubCategory.default_fixed_price);
+		price = isFixed
+			? (foundSubCategory.default_fixed_price || 249)
+			: (foundSubCategory.default_price_per_hour || 199);
+		priceType = isFixed ? "fixed" : "hourly";
+		priceUnit = isFixed ? "Fixed" : "/ hr";
 	}
 
 	const serviceLabel = foundSubCategory?.label || "Service";
@@ -41,7 +54,7 @@ export default function ProfessionalCard({ professional, subCategory }) {
 		router.push(
 			`/booking/schedule?worker_id=${professional.id}&action=${encodeURIComponent(
 				subCategory || "consult"
-			)}&amount=${price}`
+			)}&amount=${price}&price_type=${priceType}`
 		);
 	};
 
@@ -86,6 +99,8 @@ export default function ProfessionalCard({ professional, subCategory }) {
 					subCategory={subCategory}
 					details={`Configured rate for ${serviceLabel}`}
 					price={price}
+					priceType={priceType}
+					priceUnit={priceUnit}
 				/>
 
 				<div className="flex items-center gap-3">

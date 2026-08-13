@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
+import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import Header from "@/app/components/Header";
@@ -124,11 +124,16 @@ export default function OrdersPage() {
               <div className="bg-white rounded-md border border-slate-200 shadow-2xs p-4 hover:border-slate-300 transition cursor-pointer space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-bold text-slate-900 truncate">
                         {booking.service_id?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       </span>
                       <StatusBadge status={booking.status} />
+                      {(booking.time_slot?.toUpperCase().includes("ASAP") || booking.time_slot?.toUpperCase().includes("INSTANT")) && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-sm">
+                          <Zap size={10} className="fill-amber-500 text-amber-600" /> Instant ASAP
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-500 flex items-center gap-1">
                       <Clock size={11} className="shrink-0" />
