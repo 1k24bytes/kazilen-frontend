@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 import CompletionReviewModal from "@/app/components/CompletionReviewModal";
+import BottomNav from "@/app/components/BottomNav";
 
 const STATUS_STEPS = ["pending", "accepted", "in_progress", "completed"];
 
@@ -121,7 +122,7 @@ export default function BookingDetailPage() {
   const currentStep = STATUS_STEPS.indexOf(booking?.status);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-50 font-sans pb-24">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
         <button
@@ -159,6 +160,12 @@ export default function BookingDetailPage() {
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Current Status</p>
                 <StatusBadge status={booking.status} />
+                {booking.worker_name && (
+                  <p className="text-xs text-slate-700 font-semibold mt-2 flex items-center gap-1.5">
+                    <User size={13} className="text-[#ff8a4c] shrink-0" />
+                    <span>Assigned Specialist: <span className="text-slate-900 font-bold">{booking.worker_name}</span></span>
+                  </p>
+                )}
               </div>
               {booking.amount && (
                 <div className="text-right">
@@ -272,6 +279,9 @@ export default function BookingDetailPage() {
             <div className="bg-white rounded-md border border-slate-200 shadow-2xs p-4">
               <p className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Details</p>
               <InfoRow icon={<User size={15} />} label="Service" value={serviceLabel} />
+              {booking.worker_name && (
+                <InfoRow icon={<User size={15} className="text-[#ff8a4c]" />} label="Assigned Specialist" value={booking.worker_name} />
+              )}
               {(booking.time_slot?.toUpperCase().includes("ASAP") || booking.time_slot?.toUpperCase().includes("INSTANT")) && (
                 <InfoRow
                   icon={<Zap size={15} className="text-amber-600" />}
@@ -317,6 +327,8 @@ export default function BookingDetailPage() {
         )}
 
       </div>
+
+      <BottomNav />
     </div>
   );
 }

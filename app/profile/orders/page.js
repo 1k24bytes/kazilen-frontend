@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle, ShieldCheck, Zap } from "lucide-react";
+import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle, ShieldCheck, Zap, User } from "lucide-react";
 import Link from "next/link";
 import { API_BASE_URL } from "@/lib/api";
 import Header from "@/app/components/Header";
+import BottomNav from "@/app/components/BottomNav";
 
 const STATUS_CONFIG = {
   pending: { label: "Pending", className: "bg-slate-100 text-slate-600 border-slate-200" },
@@ -63,7 +64,7 @@ export default function OrdersPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-50 font-sans pb-24">
       <Header />
 
       {/* Sub-header */}
@@ -135,6 +136,12 @@ export default function OrdersPage() {
                         </span>
                       )}
                     </div>
+                    {booking.worker_name && (
+                      <p className="text-xs text-slate-700 font-semibold flex items-center gap-1">
+                        <User size={11} className="text-[#ff8a4c] shrink-0" />
+                        <span>Partner: <span className="text-slate-900 font-bold">{booking.worker_name}</span></span>
+                      </p>
+                    )}
                     <p className="text-xs text-slate-500 flex items-center gap-1">
                       <Clock size={11} className="shrink-0" />
                       {booking.date} · {booking.time_slot}
@@ -183,6 +190,8 @@ export default function OrdersPage() {
         })}
 
       </div>
+
+      <BottomNav />
     </div>
   );
 }

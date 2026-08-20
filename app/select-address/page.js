@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '../components/Header'
+import BottomNav from '../components/BottomNav'
 import BackHeader from '../profile/components/BackHeader'
 import LocationModal from '../components/LocationModal'
 import { MapPin, Plus, Trash2, CheckCircle2, Bookmark, Home, Briefcase, Building, Loader2 } from 'lucide-react'
@@ -229,6 +230,8 @@ export default function SavedAddressesPage() {
           fetchAddresses()
         }}
       />
+
+      <BottomNav />
     </div>
   )
 }

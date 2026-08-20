@@ -7,6 +7,7 @@ import { AlertCircle, Edit3, Loader2, Star } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 import servicesConfig from "@/app/data/services.json";
 import BackHeader from "@/app/profile/components/BackHeader";
+import BottomNav from "@/app/components/BottomNav";
 
 function getServiceLabel(serviceId) {
   const service = servicesConfig.subCategories.find((item) => item.id === serviceId);
@@ -276,6 +277,8 @@ export default function RatingPage() {
           onSaved={saveEditedReview}
         />
       )}
+
+      <BottomNav />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import Header from '../components/Header'
+import BottomNav from '../components/BottomNav'
 import BackHeader from './components/BackHeader'
 import PlatformFeedbackModal from './components/PlatformFeedbackModal'
 import { useEffect, useState } from 'react'
@@ -375,6 +376,8 @@ export default function ProfilePage() {
           }}
         />
       )}
+
+      <BottomNav />
     </div>
   )
 }

@@ -6,6 +6,7 @@ import SubCategoryTabs from "./components/SubCategoryTabs";
 import ProfessionalCard from "./components/ProfessionalCard";
 import ProfessionalCardSkeleton from "./components/skeletons/ProfessionalCardSkeleton";
 import Header from "./components/Header";
+import BottomNav from "./components/BottomNav";
 import { Search, Zap } from "lucide-react";
 import { API_BASE_URL } from "@/lib/api";
 
@@ -136,6 +137,8 @@ export default function HomePage() {
 					)}
 				</section>
 			</main>
+
+			<BottomNav />
 		</div>
 	);
 }
