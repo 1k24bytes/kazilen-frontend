@@ -5,25 +5,22 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import LocationModal from './LocationModal'
 
-import { API_BASE_URL } from '@/lib/api'
+import { API_BASE_URL, apiFetch } from '@/lib/api'
 
 export default function Header() {
   const router = useRouter()
-  const [token, setToken] = useState(null)
   const [currentArea, setCurrentArea] = useState('Nagpur, MH')
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [showLocationBanner, setShowLocationBanner] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedToken = localStorage.getItem('access_token')
-      setToken(storedToken)
       const savedArea = localStorage.getItem('user_location_area')
       if (savedArea) {
         setCurrentArea(savedArea)
-      } else if (storedToken) {
-        fetch(`${API_BASE_URL}/addresses`, {
-          headers: { Authorization: `Bearer ${storedToken}` }
+      } else {
+        apiFetch(`${API_BASE_URL}/addresses`, {
+          headers: { }
         })
           .then((res) => (res.ok ? res.json() : []))
           .then((data) => {
@@ -42,11 +39,6 @@ export default function Header() {
             const dismissed = localStorage.getItem('location_prompt_dismissed')
             if (!dismissed) setShowLocationBanner(true)
           })
-      } else {
-        const dismissed = localStorage.getItem('location_prompt_dismissed')
-        if (!dismissed) {
-          setShowLocationBanner(true)
-        }
       }
     }
   }, [])
@@ -70,11 +62,7 @@ export default function Header() {
   }
 
   const openProfile = () => {
-    if (token) {
-      router.push('/profile')
-    } else {
-      router.push('/login')
-    }
+    router.push('/profile')
   }
 
   return (

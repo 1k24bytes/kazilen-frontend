@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AlertCircle, Edit3, Loader2, Star } from "lucide-react";
 
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 import servicesConfig from "@/app/data/services.json";
 import BackHeader from "@/app/profile/components/BackHeader";
 import BottomNav from "@/app/components/BottomNav";
@@ -95,12 +95,10 @@ function EditReviewModal({ item, onClose, onSaved }) {
     setSaving(true);
     setError("");
     try {
-      const token = localStorage.getItem("access_token");
-      const response = await fetch(`${API_BASE_URL}/reviews/participant/${item.id}`, {
+      const response = await apiFetch(`${API_BASE_URL}/reviews/participant/${item.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ rating, description: description.trim() }),
       });
@@ -184,15 +182,9 @@ export default function RatingPage() {
 
   useEffect(() => {
     const loadHistory = async () => {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
       try {
-        const response = await fetch(`${API_BASE_URL}/reviews/my`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await apiFetch(`${API_BASE_URL}/reviews/my`, {
+                  });
         if (response.status === 401) {
           router.push("/login");
           return;

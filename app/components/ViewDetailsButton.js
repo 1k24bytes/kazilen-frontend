@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, ShieldCheck, Star, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 
 export default function ViewDetailsButton({ professional, subCategory, price, priceType = "hourly", priceUnit = "/ hr" }) {
 	const router = useRouter();
@@ -27,7 +27,7 @@ export default function ViewDetailsButton({ professional, subCategory, price, pr
 		const loadReviews = async () => {
 			setReviewsLoading(true);
 			try {
-				const response = await fetch(`${API_BASE_URL}/workers/${professional.id}/reviews`);
+				const response = await apiFetch(`${API_BASE_URL}/workers/${professional.id}/reviews`);
 				const payload = await response.json();
 				if (response.ok) {
 					setReviewsData(payload);

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Calendar, Clock, MapPin, ArrowLeft, ArrowRight, CheckCircle2, Zap, ShieldCheck, LocateFixed, AlertCircle } from "lucide-react";
 import servicesData from "../../data/services.json";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 import Header from "@/app/components/Header";
 import LocationModal from "@/app/components/LocationModal";
 
@@ -77,17 +77,10 @@ export default function BookingSchedulePage() {
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   const fetchAddresses = async () => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-    if (!token) {
-      const saved = localStorage.getItem("user_saved_address");
-      if (saved) setAddress(saved);
-      return;
-    }
-
     setLoadingAddresses(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/addresses`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`${API_BASE_URL}/addresses`, {
+        headers: { }
       });
       if (res.ok) {
         const data = await res.json();
@@ -178,7 +171,7 @@ export default function BookingSchedulePage() {
       return;
     }
     setSlotsLoading(true);
-    fetch(`${API_BASE_URL}/bookings/worker-slots?worker_id=${workerId}&date=${selectedDate}`)
+    apiFetch(`${API_BASE_URL}/bookings/worker-slots?worker_id=${workerId}&date=${selectedDate}`)
       .then((r) => r.json())
       .then((data) => {
         setBookedHours(data.booked_hours || []);
@@ -230,17 +223,10 @@ export default function BookingSchedulePage() {
     const timeSlotToSend = bookingMode === "asap" ? "Instant / ASAP" : `${selectedTime}-${endHour}`;
 
     try {
-      const token = localStorage.getItem("access_token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
-      const res = await fetch(`${API_BASE_URL}/bookings/book`, {
+      const res = await apiFetch(`${API_BASE_URL}/bookings/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           worker_id: parseInt(workerId),

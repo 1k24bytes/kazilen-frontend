@@ -15,7 +15,7 @@ import {
   Check,
   Zap,
 } from "lucide-react";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 import CompletionReviewModal from "@/app/components/CompletionReviewModal";
 import BottomNav from "@/app/components/BottomNav";
 
@@ -70,12 +70,9 @@ export default function BookingDetailPage() {
   };
 
   const fetchBooking = async () => {
-    const token = localStorage.getItem("access_token");
-    if (!token) { router.push("/login"); return; }
     try {
-      const res = await fetch(`${API_BASE_URL}/bookings/${bookingId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await apiFetch(`${API_BASE_URL}/bookings/${bookingId}`, {
+              });
       if (res.ok) {
         const data = await res.json();
         setBooking(data);
@@ -97,10 +94,8 @@ export default function BookingDetailPage() {
 
   useEffect(() => {
     if (!bookingId || booking?.status !== "completed") return;
-    const token = localStorage.getItem("access_token");
-    fetch(`${API_BASE_URL}/reviews/bookings/${bookingId}/status`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    apiFetch(`${API_BASE_URL}/reviews/bookings/${bookingId}/status`, {
+          })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => data && setReviewStatus(data))
       .catch(() => {});
@@ -122,7 +117,7 @@ export default function BookingDetailPage() {
   const currentStep = STATUS_STEPS.indexOf(booking?.status);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-24">
+    <div className="min-h-screen bg-slate-50 font-sans">
       {/* Header */}
       <div className="bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
         <button

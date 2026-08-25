@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Star, X, Check, ShieldCheck } from "lucide-react";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 
 const RATING_OPTIONS = [1, 2, 3, 4, 5];
 
@@ -27,12 +27,10 @@ export default function PlatformFeedbackModal({ initialFeedback, onClose, onSave
     setSaving(true);
     setError("");
     try {
-      const token = localStorage.getItem("access_token");
-      const res = await fetch(`${API_BASE_URL}/reviews/platform`, {
+      const res = await apiFetch(`${API_BASE_URL}/reviews/platform`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ rating, description: description.trim() }),
       });

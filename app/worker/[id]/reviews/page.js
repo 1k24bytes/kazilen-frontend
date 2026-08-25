@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { AlertCircle, Loader2, Star } from "lucide-react";
 
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 import servicesConfig from "@/app/data/services.json";
 import BottomNav from "@/app/components/BottomNav";
 
@@ -50,7 +50,7 @@ export default function WorkerReviewsPage() {
 		if (!workerId) return;
 		const loadReviews = async () => {
 			try {
-				const response = await fetch(`${API_BASE_URL}/workers/${workerId}/reviews`);
+				const response = await apiFetch(`${API_BASE_URL}/workers/${workerId}/reviews`);
 				const payload = await response.json();
 				if (!response.ok) {
 					setError(payload.detail || "Could not load reviews for this technician.");

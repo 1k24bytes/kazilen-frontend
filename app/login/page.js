@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 import TermsOfCondition from "./TermsOfCondition";
 import { ShieldCheck, PhoneCall, ArrowRight } from "lucide-react";
 
@@ -14,9 +14,11 @@ export default function LoginPage() {
 	const [acceptedTerms, setAcceptedTerms] = useState(true);
 
 	useEffect(() => {
-		if (localStorage.getItem("access_token")) {
-			router.replace("/");
-		}
+		apiFetch(`${API_BASE_URL}/users/me`).then((res) => {
+			if (res.ok) {
+				router.replace("/");
+			}
+		});
 	}, [router]);
 
 	const handleContinue = async () => {
@@ -37,7 +39,7 @@ export default function LoginPage() {
 		try {
 			setLoading(true);
 
-			const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
+			const response = await apiFetch(`${API_BASE_URL}/auth/send-otp`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

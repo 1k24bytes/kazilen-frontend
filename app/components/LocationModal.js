@@ -14,7 +14,7 @@ import {
   Plus,
   Bookmark
 } from 'lucide-react'
-import { API_BASE_URL } from '@/lib/api'
+import { API_BASE_URL, apiFetch } from '@/lib/api'
 
 export default function LocationModal({ isOpen, onClose, onSelectAddress, initialAddress = '' }) {
   const [savedAddresses, setSavedAddresses] = useState([])
@@ -40,17 +40,9 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
   // Load saved addresses from DB whenever modal opens
   useEffect(() => {
     if (!isOpen) return
-
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-    if (!token) {
-      setSavedAddresses([])
-      setShowAddForm(true)
-      return
-    }
-
     setLoadingSaved(true)
-    fetch(`${API_BASE_URL}/addresses`, {
-      headers: { Authorization: `Bearer ${token}` }
+    apiFetch(`${API_BASE_URL}/addresses`, {
+      headers: { }
     })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
@@ -89,7 +81,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
 
         try {
           // OpenStreetMap Nominatim reverse geocode
-          const response = await fetch(
+          const response = await apiFetch(
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1`,
             {
               headers: {
@@ -208,16 +200,14 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
       console.error('Failed to cache address:', e)
     }
 
-    // Save to backend database if token is present
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-    if (token) {
+    // Save to backend database (auth cookie is sent automatically)
+    {
       setSavingDb(true)
       try {
-        await fetch(`${API_BASE_URL}/addresses`, {
+        await apiFetch(`${API_BASE_URL}/addresses`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
           },
           body: JSON.stringify({
             tag: addressType,

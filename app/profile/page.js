@@ -21,7 +21,7 @@ import {
   Gift,
   HeartHandshake,
 } from 'lucide-react'
-import { API_BASE_URL } from '@/lib/api'
+import { API_BASE_URL, apiFetch } from '@/lib/api'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -33,10 +33,10 @@ export default function ProfilePage() {
   const [platformFeedback, setPlatformFeedback] = useState(null)
   const [showPlatformModal, setShowPlatformModal] = useState(false)
 
-  const fetchActiveBookings = async (token) => {
+  const fetchActiveBookings = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/bookings/my`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`${API_BASE_URL}/bookings/my`, {
+        headers: { }
       })
       if (res.ok) {
         const data = await res.json()
@@ -50,10 +50,10 @@ export default function ProfilePage() {
     }
   }
 
-  const fetchPlatformFeedback = async (token) => {
+  const fetchPlatformFeedback = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/reviews/platform/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`${API_BASE_URL}/reviews/platform/me`, {
+        headers: { }
       })
       if (res.ok) {
         const data = await res.json()
@@ -67,7 +67,6 @@ export default function ProfilePage() {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
     const savedName = localStorage.getItem('kazilen_professional_name') || localStorage.getItem('userName') || localStorage.getItem('user_name') || ''
     const savedPhone = localStorage.getItem('user_phone') || localStorage.getItem('phone') || ''
 
@@ -75,10 +74,8 @@ export default function ProfilePage() {
       setUserProfile({ full_name: savedName, phone_number: savedPhone, role: 'customer' })
     }
 
-    if (!token) return
-
-    fetch(`${API_BASE_URL}/users/me`, {
-      headers: { Authorization: `Bearer ${token}` }
+    apiFetch(`${API_BASE_URL}/users/me`, {
+      headers: { }
     })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
@@ -95,10 +92,10 @@ export default function ProfilePage() {
       })
       .catch((error) => console.error('Failed to load user details:', error))
 
-    fetchActiveBookings(token)
-    fetchPlatformFeedback(token)
+    fetchActiveBookings()
+    fetchPlatformFeedback()
     const interval = setInterval(() => {
-      fetchActiveBookings(token)
+      fetchActiveBookings()
     }, 4000)
 
     return () => clearInterval(interval)
@@ -123,6 +120,11 @@ export default function ProfilePage() {
   }
 
   const handleLogout = async () => {
+    try {
+      await apiFetch(`${API_BASE_URL}/auth/logout`, { method: 'POST' })
+    } catch {
+      // ignore network errors, still clear local state
+    }
     if (typeof window !== 'undefined') {
       localStorage.clear()
     }

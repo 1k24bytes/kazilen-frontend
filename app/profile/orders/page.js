@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronRight, ClipboardList, Clock, CheckCircle2, Loader2, AlertCircle, ShieldCheck, Zap, User } from "lucide-react";
 import Link from "next/link";
-import { API_BASE_URL } from "@/lib/api";
+import { API_BASE_URL, apiFetch } from "@/lib/api";
 import Header from "@/app/components/Header";
 import BottomNav from "@/app/components/BottomNav";
 
@@ -32,17 +32,10 @@ export default function OrdersPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
     const fetchBookings = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/bookings/my`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await apiFetch(`${API_BASE_URL}/bookings/my`, {
+                  });
         if (res.ok) {
           const data = await res.json();
           setBookings(data.bookings || []);
@@ -64,7 +57,7 @@ export default function OrdersPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-24">
+    <div className="min-h-screen bg-slate-50 font-sans">
       <Header />
 
       {/* Sub-header */}

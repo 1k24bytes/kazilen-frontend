@@ -7,7 +7,7 @@ import BottomNav from '../components/BottomNav'
 import BackHeader from '../profile/components/BackHeader'
 import LocationModal from '../components/LocationModal'
 import { MapPin, Plus, Trash2, CheckCircle2, Bookmark, Home, Briefcase, Building, Loader2 } from 'lucide-react'
-import { API_BASE_URL } from '@/lib/api'
+import { API_BASE_URL, apiFetch } from '@/lib/api'
 
 export default function SavedAddressesPage() {
   const router = useRouter()
@@ -17,15 +17,9 @@ export default function SavedAddressesPage() {
   const [actionLoadingId, setActionLoadingId] = useState(null)
 
   const fetchAddresses = async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-    if (!token) {
-      router.push('/login')
-      return
-    }
-
     try {
-      const res = await fetch(`${API_BASE_URL}/addresses`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`${API_BASE_URL}/addresses`, {
+        headers: { }
       })
       if (res.ok) {
         const data = await res.json()
@@ -43,14 +37,10 @@ export default function SavedAddressesPage() {
   }, [])
 
   const handleSetDefault = async (addressId) => {
-    const token = localStorage.getItem('access_token')
-    if (!token) return
-
     setActionLoadingId(addressId)
     try {
-      const res = await fetch(`${API_BASE_URL}/addresses/${addressId}/default`, {
-        method: 'PATCH',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`${API_BASE_URL}/addresses/${addressId}/default`, {
+        method: 'PATCH'
       })
       if (res.ok) {
         await fetchAddresses()
@@ -65,14 +55,10 @@ export default function SavedAddressesPage() {
   const handleDelete = async (addressId) => {
     if (!confirm('Are you sure you want to delete this saved address?')) return
 
-    const token = localStorage.getItem('access_token')
-    if (!token) return
-
     setActionLoadingId(addressId)
     try {
-      const res = await fetch(`${API_BASE_URL}/addresses/${addressId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`${API_BASE_URL}/addresses/${addressId}`, {
+        method: 'DELETE'
       })
       if (res.ok) {
         await fetchAddresses()
@@ -92,7 +78,7 @@ export default function SavedAddressesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans">
       <Header />
       <BackHeader title="Saved Addresses" />
 
