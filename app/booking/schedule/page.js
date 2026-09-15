@@ -241,6 +241,8 @@ export default function BookingSchedulePage() {
       const data = await res.json();
       if (res.ok) {
         router.push("/profile/orders");
+      } else if (res.status === 402) {
+        setError(`${data.detail || "This specialist has reached the booking limit."} Please pick another verified partner.`);
       } else {
         setError(data.detail || "Booking failed. Please try again.");
       }

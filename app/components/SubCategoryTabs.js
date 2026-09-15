@@ -1,20 +1,28 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { X, LayoutGrid, Check } from 'lucide-react'
-import servicesData from '../data/services.json'
-
-const subCategories = servicesData.subCategories || []
+import { fetchCatalog, getSeedCatalog } from '@/lib/catalog'
 
 export default function SubCategoryTabs({ value, onChange, category }) {
   const [showAll, setShowAll] = useState(false)
+  const [subCategories, setSubCategories] = useState(() => getSeedCatalog().subCategories)
+
+  useEffect(() => {
+    let active = true
+    fetchCatalog().then((catalog) => {
+      if (active && catalog.subCategories?.length) setSubCategories(catalog.subCategories)
+    })
+    return () => { active = false }
+  }, [])
 
   // Filter subCategories matching the active trade category
   const filteredSubCategories = subCategories.filter((s) => {
     if (!category) return true
-    if (s.categoryId === category) return true
-    if (category.toLowerCase().includes(s.categoryId?.toLowerCase() || '')) return true
+    const catId = s.categoryId || s.category_id
+    if (catId === category) return true
+    if (category.toLowerCase().includes((catId || '').toLowerCase())) return true
     return false
   })
 

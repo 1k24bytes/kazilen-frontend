@@ -13,6 +13,23 @@ import { API_BASE_URL, apiFetch } from "@/lib/api";
 export default function HomePage() {
 	const [category, setCategory] = useState("Electrician");
 	const [subCategory, setSubCategory] = useState("consult");
+	const [catalog, setCatalog] = useState({ categories: [], subCategories: [] });
+
+	useEffect(() => {
+		let active = true;
+		import("@/lib/catalog").then(({ fetchCatalog }) =>
+			fetchCatalog().then((data) => {
+				if (!active) return;
+				setCatalog(data);
+				if (data.categories?.length && !data.categories.some((c) => c.id === category || c.name === category)) {
+					const first = data.categories[0];
+					setCategory(first.id || first.name);
+					setSubCategory("");
+				}
+			})
+		);
+		return () => { active = false; };
+	}, []);
 
 	const [workers, setWorkers] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
@@ -131,6 +148,7 @@ export default function HomePage() {
 									key={worker.id}
 									professional={worker}
 									subCategory={subCategory}
+									catalogSub={catalog.subCategories?.find((s) => s.id === subCategory)}
 								/>
 							))}
 						</div>

@@ -1,11 +1,19 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import servicesData from '../data/services.json'
-
-const categories = servicesData.categories || []
+import { fetchCatalog, getSeedCatalog } from '@/lib/catalog'
 
 export default function CategoryTabs({ value, onChange }) {
+  const [categories, setCategories] = useState(() => getSeedCatalog().categories)
+
+  useEffect(() => {
+    let active = true
+    fetchCatalog().then((catalog) => {
+      if (active && catalog.categories?.length) setCategories(catalog.categories)
+    })
+    return () => { active = false }
+  }, [])
   return (
     <div className="bg-white border-b border-slate-200/80 py-4 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

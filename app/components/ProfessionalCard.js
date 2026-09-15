@@ -5,13 +5,13 @@ import { useRouter } from "next/navigation";
 import ViewDetailsButton from "./ViewDetailsButton";
 import servicesData from "../data/services.json";
 
-export default function ProfessionalCard({ professional, subCategory }) {
+export default function ProfessionalCard({ professional, subCategory, catalogSub }) {
 	const router = useRouter();
 
 	const fullName = professional.full_name || professional.name || "Verified Technician";
 
-	// Look up subcategory default configuration from services.json
-	const foundSubCategory = servicesData?.subCategories?.find(
+	// Default pricing: admin catalog first, services.json fallback
+	const foundSubCategory = catalogSub || servicesData?.subCategories?.find(
 		(s) => s.id === subCategory
 	);
 
@@ -38,12 +38,11 @@ export default function ProfessionalCard({ professional, subCategory }) {
 		priceType = isFixed ? "fixed" : "hourly";
 		priceUnit = isFixed ? "Fixed" : "/ hr";
 	} else if (foundSubCategory) {
-		const isFixed =
-			foundSubCategory.default_price_type === "fixed" ||
-			Boolean(foundSubCategory.default_fixed_price);
-		price = isFixed
-			? (foundSubCategory.default_fixed_price || 249)
-			: (foundSubCategory.default_price_per_hour || 199);
+		const priceTypeRaw = foundSubCategory.price_type || foundSubCategory.default_price_type;
+		const fixedRaw = foundSubCategory.fixed_price ?? foundSubCategory.default_fixed_price;
+		const hourlyRaw = foundSubCategory.price_per_hour ?? foundSubCategory.default_price_per_hour;
+		const isFixed = priceTypeRaw === "fixed" || Boolean(fixedRaw);
+		price = isFixed ? (fixedRaw || 249) : (hourlyRaw || 199);
 		priceType = isFixed ? "fixed" : "hourly";
 		priceUnit = isFixed ? "Fixed" : "/ hr";
 	}
