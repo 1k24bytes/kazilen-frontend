@@ -43,8 +43,19 @@ export default function HomePage() {
 
 			setIsLoading(true);
 			try {
+				let coordsSuffix = "";
+				try {
+					const saved = JSON.parse(localStorage.getItem("user_location_coords") || "null");
+					const lat = parseFloat(saved?.latitude);
+					const lng = parseFloat(saved?.longitude);
+					if (Number.isFinite(lat) && Number.isFinite(lng)) {
+						coordsSuffix = `&lat=${lat}&lng=${lng}`;
+					}
+				} catch {
+					// no saved GPS coords — marketplace returns default order
+				}
 				const response = await apiFetch(
-					`${API_BASE_URL}/workers?sub_category=${encodeURIComponent(subCategory)}`
+					`${API_BASE_URL}/workers?sub_category=${encodeURIComponent(subCategory)}${coordsSuffix}`
 				);
 				if (response.ok) {
 					const data = await response.json();
