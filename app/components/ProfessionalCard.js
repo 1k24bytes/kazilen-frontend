@@ -60,8 +60,20 @@ export default function ProfessionalCard({ professional, subCategory, catalogSub
 	return (
 		<div className="w-full bg-white rounded-md border border-slate-200 p-5 shadow-2xs hover:border-[#ff8a4c]/50 transition flex flex-col justify-between space-y-4">
 			<div className="space-y-3">
-				{/* Top Row: Name + Verified + Rating */}
-				<div className="flex items-start justify-between gap-3">
+			{/* Top Row: Photo + Name + Verified + Rating */}
+			<div className="flex items-start justify-between gap-3">
+				<div className="flex items-start gap-3 min-w-0">
+					{professional.profile_photo ? (
+						<img
+							src={professional.profile_photo}
+							alt={fullName}
+							className="w-10 h-10 rounded-sm border border-slate-200 object-cover shrink-0"
+						/>
+					) : (
+						<div className="w-10 h-10 rounded-sm bg-slate-100 border border-slate-200 text-slate-500 flex items-center justify-center text-sm font-bold shrink-0">
+							{(fullName || "V").trim().charAt(0).toUpperCase()}
+						</div>
+					)}
 					<div className="space-y-1 min-w-0">
 						<div className="flex items-center gap-2 flex-wrap">
 							<h3 className="text-base font-bold text-slate-900 tracking-tight truncate">
@@ -78,6 +90,8 @@ export default function ProfessionalCard({ professional, subCategory, catalogSub
 							<span className="truncate">{professional.locality || professional.address || "Nagpur, MH"}</span>
 						</p>
 					</div>
+					</div>
+				</div>
 
 					{professional.rating && Number(professional.rating) > 0 && professional.reviews_count !== 0 ? (
 						<div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-sm bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold shrink-0">
@@ -88,7 +102,6 @@ export default function ProfessionalCard({ professional, subCategory, catalogSub
 							)}
 						</div>
 					) : null}
-				</div>
 			</div>
 
 			{/* Bottom Action & Price Row */}
