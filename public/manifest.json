@@ -6,9 +6,11 @@
   "start_url": "/",
   "scope": "/",
   "orientation": "any",
-  "id": "",
+  "id": "/",
   "lang": "en",
   "dir": "auto",
+  "theme_color": "#ff8a4c",
+  "background_color": "#f8fafc",
   "icons": [
     {
       "src": "icons/icon-72x72.png",
