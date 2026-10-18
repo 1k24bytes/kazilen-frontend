@@ -26,7 +26,7 @@ import { API_BASE_URL, apiFetch } from '@/lib/api'
 export default function ProfilePage() {
   const router = useRouter()
   const [userProfile, setUserProfile] = useState({ full_name: '', phone_number: '', role: 'customer' })
-  const [referral, setReferral] = useState({ code: '', points: 0 })
+  const [referral, setReferral] = useState({ code: '', points: 0, earnings: 0 })
   const [copied, setCopied] = useState(false)
   const [activeOtpBookings, setActiveOtpBookings] = useState([])
   const [copiedOtp, setCopiedOtp] = useState(null)
@@ -87,7 +87,7 @@ export default function ProfilePage() {
           })
           if (data.full_name) localStorage.setItem('kazilen_professional_name', data.full_name)
           if (data.phone_number) localStorage.setItem('user_phone', data.phone_number)
-          setReferral({ code: data.referral_code || '', points: data.referral_points || 0 })
+          setReferral({ code: data.referral_code || '', points: data.referral_points || 0, earnings: data.referral_earnings || 0 })
         }
       })
       .catch((error) => console.error('Failed to load user details:', error))
@@ -329,12 +329,12 @@ export default function ProfilePage() {
               <div className="p-2 rounded-sm bg-[#fff4ed] text-[#ff8a4c]"><Gift size={18} /></div>
               <div>
                 <h2 className="text-sm font-bold text-slate-900">Refer a friend</h2>
-                <p className="text-xs text-slate-500 mt-1">Share your code and earn one referral point when a new customer joins.</p>
+                <p className="text-xs text-slate-500 mt-1">Share your code and earn points + ₹ rewards when someone joins.</p>
               </div>
             </div>
             <div className="text-right shrink-0">
               <p className="text-lg font-bold text-slate-900">{referral.points}</p>
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Points</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Points · ₹{referral.earnings || 0}</p>
             </div>
           </div>
           <div className="mt-4 flex flex-col sm:flex-row gap-2">
