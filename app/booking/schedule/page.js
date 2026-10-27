@@ -423,7 +423,8 @@ export default function BookingSchedulePage() {
           <p className="text-xs text-slate-500">{subCategory?.label || serviceId}</p>
         </div>
         {/* Step indicator */}
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-[11px] font-bold tabular-nums text-slate-500">Step {step} of 2</span>
           <span className={`w-6 h-1.5 rounded-sm ${step >= 1 ? "bg-[#ff8a4c]" : "bg-slate-200"}`} />
           <span className={`w-6 h-1.5 rounded-sm ${step >= 2 ? "bg-[#ff8a4c]" : "bg-slate-200"}`} />
         </div>
@@ -442,11 +443,7 @@ export default function BookingSchedulePage() {
                 <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
                   Select Dispatch Mode
                 </span>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-sm border ${
-                  isFixedPrice
-                    ? "bg-blue-50 text-blue-700 border-blue-200"
-                    : "bg-purple-50 text-purple-700 border-purple-200"
-                }`}>
+                <span className="text-[11px] font-bold px-2 py-0.5 rounded-sm border bg-slate-100 text-slate-600 border-slate-200">
                   {isFixedPrice ? "Fixed Job Price" : "Hourly Rate Service"}
                 </span>
               </div>

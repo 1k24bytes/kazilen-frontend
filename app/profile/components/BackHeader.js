@@ -11,7 +11,7 @@ export default function BackHeader({ title = 'Account Settings' }) {
       <div className="max-w-4xl mx-auto flex items-center gap-3">
         <button
           onClick={() => router.back()}
-          className="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer"
+          className="w-9 h-9 rounded-sm hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer"
           aria-label="Go Back"
         >
           <ArrowLeft size={18} />

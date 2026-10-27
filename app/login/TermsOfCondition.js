@@ -24,10 +24,10 @@ export default function TermsOfCondition({ open, onClose }) {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex justify-center items-center">
+    <div className="fixed inset-0 z-50 bg-black/40 flex justify-center items-center">
       <div
         ref={modalRef}
-        className="bg-white rounded-xl max-w-md w-[90%] p-6 shadow-xl relative"
+        className="bg-white rounded-sm max-w-md w-[90%] p-6 shadow-2xl relative"
       >
         <h2 className="text-lg font-bold mb-3 text-black">Terms of Service</h2>
 

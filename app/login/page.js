@@ -12,6 +12,7 @@ export default function LoginPage() {
 	const [showModal, setShowModal] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [acceptedTerms, setAcceptedTerms] = useState(true);
+	const [formError, setFormError] = useState("");
 
 	useEffect(() => {
 		apiFetch(`${API_BASE_URL}/users/me`).then((res) => {
@@ -23,12 +24,12 @@ export default function LoginPage() {
 
 	const handleContinue = async () => {
 		if (!acceptedTerms) {
-			alert("Please accept Terms of Condition");
+			setFormError("Please accept the Terms & Conditions to continue.");
 			return;
 		}
 
 		if (!/^\d{10}$/.test(phone)) {
-			alert("Please enter a valid 10-digit mobile number");
+			setFormError("Please enter a valid 10-digit mobile number.");
 			return;
 		}
 
@@ -38,6 +39,7 @@ export default function LoginPage() {
 
 		try {
 			setLoading(true);
+			setFormError("");
 
 			const response = await apiFetch(`${API_BASE_URL}/auth/send-otp`, {
 				method: "POST",
@@ -49,7 +51,7 @@ export default function LoginPage() {
 
 			if (!response.ok) {
 				const errorData = await response.json().catch(() => ({}));
-				alert(`Failed to send OTP: ${errorData.detail || "Server error"}`);
+				setFormError(`Failed to send OTP: ${errorData.detail || "Server error"}.`);
 				return;
 			}
 
@@ -59,7 +61,7 @@ export default function LoginPage() {
 			const referralQuery = referralCode ? `&ref=${encodeURIComponent(referralCode)}` : "";
 			router.push(`/verify?phone=${encodeURIComponent(phone)}${referralQuery}`);
 		} catch (e) {
-			alert(`Failed to check phone: ${e?.message ?? e}`);
+			setFormError(`Failed to check phone: ${e?.message ?? e}.`);
 		} finally {
 			setLoading(false);
 		}
@@ -74,11 +76,11 @@ export default function LoginPage() {
 		<div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 py-12 font-sans">
 			
 			{/* Desktop Container Card */}
-			<div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-xl space-y-6">
+			<div className="w-full max-w-md bg-white rounded-md border border-slate-200 p-8 sm:p-10 shadow-2xs space-y-6">
 				
 				{/* Brand Header */}
 				<div className="text-center space-y-2">
-					<div className="w-12 h-12 rounded-2xl bg-[#ff8a4c] flex items-center justify-center text-white font-extrabold text-2xl mx-auto shadow-md shadow-orange-500/20">
+					<div className="w-12 h-12 rounded-md bg-[#ff8a4c] flex items-center justify-center text-white font-extrabold text-2xl mx-auto">
 						K
 					</div>
 					<h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
@@ -107,7 +109,7 @@ export default function LoginPage() {
 								placeholder="9876543210"
 								value={phone}
 								onChange={handlePhoneInput}
-								className="w-full pl-14 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:border-[#ff8a4c] focus:ring-2 focus:ring-[#ff8a4c]/20 text-sm font-semibold text-slate-900 placeholder:text-slate-400 transition"
+								className="w-full pl-14 pr-4 py-3 border border-slate-300 rounded-sm focus:outline-none focus:border-[#ff8a4c] focus:ring-2 focus:ring-[#ff8a4c]/20 text-sm font-semibold text-slate-900 placeholder:text-slate-400 transition"
 							/>
 						</div>
 					</div>
@@ -115,19 +117,24 @@ export default function LoginPage() {
 					<button
 						onClick={handleContinue}
 						disabled={loading || phone.length !== 10}
-						className={`w-full font-bold py-3.5 rounded-xl text-sm shadow-md transition cursor-pointer flex items-center justify-center gap-2 ${
+						className={`w-full font-bold py-3.5 rounded-sm text-sm shadow-2xs transition cursor-pointer flex items-center justify-center gap-2 ${
 							loading || phone.length !== 10
 								? "cursor-not-allowed bg-slate-200 text-slate-400 shadow-none"
-								: "bg-[#ff8a4c] hover:bg-[#f07432] text-white shadow-orange-500/20 active:scale-98"
+								: "bg-[#ff8a4c] hover:bg-[#f07432] text-white active:scale-98"
 						}`}
 					>
 						<span>{loading ? "Sending OTP…" : "Continue with Mobile"}</span>
 						{!loading && <ArrowRight size={16} />}
 					</button>
+					{formError && (
+						<p role="alert" className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2">
+							{formError}
+						</p>
+					)}
 				</div>
 
 				{/* Security badge */}
-				<div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3 text-xs text-slate-600">
+				<div className="p-3.5 rounded-sm bg-slate-50 border border-slate-200/80 flex items-center gap-3 text-xs text-slate-600">
 					<ShieldCheck size={18} className="text-[#ff8a4c] shrink-0" />
 					<span>We will send a 6-digit OTP code to verify your phone.</span>
 				</div>

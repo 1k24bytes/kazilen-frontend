@@ -1,7 +1,7 @@
 export default function ProfessionalCardSkeleton() {
 	return (
 		<div className="w-full relative animate-pulse">
-			<div className="flex items-start gap-4 border border-gray-100 rounded-2xl p-4 shadow-sm bg-white mb-3">
+			<div className="flex items-start gap-4 border border-gray-100 rounded-md p-4 shadow-sm bg-white mb-3">
 				<div className="flex flex-col flex-1">
 					{/* Name & Rating Skeleton */}
 					<div className="flex justify-between items-start">

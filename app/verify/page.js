@@ -16,6 +16,7 @@ function VerifyOtpClient() {
 	const [seconds, setSeconds] = useState(30);
 	const [loading, setLoading] = useState(false);
 	const [resending, setResending] = useState(false);
+	const [formError, setFormError] = useState("");
 	const inputRefs = useRef([]);
 
 	useEffect(() => {
@@ -49,12 +50,13 @@ function VerifyOtpClient() {
 		const cleanPhone = phone.replace(/\D/g, "");
 
 		if (fullOtp.length !== 6) {
-			alert("Enter a valid 6-digit OTP");
+			setFormError("Enter a valid 6-digit OTP.");
 			return;
 		}
 
 		try {
 			setLoading(true);
+			setFormError("");
 
 			const response = await apiFetch(`${API_BASE_URL}/auth/verify-otp`, {
 				method: "POST",
@@ -69,7 +71,7 @@ function VerifyOtpClient() {
 			const data = await response.json();
 
 			if (!response.ok) {
-				alert(data.detail || "Verification failed");
+				setFormError(data.detail || "Verification failed. Check the code and try again.");
 				return;
 			}
 
@@ -84,7 +86,7 @@ function VerifyOtpClient() {
 				router.push("/");
 			}
 		} catch (e) {
-			alert(`OTP verification failed: ${e.message}`);
+			setFormError(`OTP verification failed: ${e.message}.`);
 		} finally {
 			setLoading(false);
 		}
@@ -111,7 +113,7 @@ function VerifyOtpClient() {
 			setOtpDigits(["", "", "", "", "", ""]);
 			inputRefs.current[0]?.focus();
 		} catch (e) {
-			alert(`Failed to resend OTP: ${e.message}`);
+			setFormError(`Failed to resend OTP: ${e.message}.`);
 		} finally {
 			setResending(false);
 		}
@@ -137,12 +139,12 @@ function VerifyOtpClient() {
 
 	return (
 		<div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center px-4 py-12 font-sans">
-			<div className="w-full max-w-md bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-xl space-y-6">
+			<div className="w-full max-w-md bg-white rounded-md border border-slate-200 p-8 sm:p-10 shadow-2xs space-y-6">
 				
 				<div className="flex items-center gap-3 pb-4 border-b border-slate-100">
 					<button
 						onClick={handleBack}
-						className="w-9 h-9 rounded-xl hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer"
+						className="w-9 h-9 rounded-sm hover:bg-slate-100 flex items-center justify-center text-slate-600 transition cursor-pointer"
 					>
 						<ArrowLeft size={20} />
 					</button>
@@ -165,7 +167,7 @@ function VerifyOtpClient() {
 							value={digit}
 							onChange={(e) => handleChange(e.target.value, idx)}
 							onKeyDown={(e) => handleKeyDown(e, idx)}
-							className="w-11 h-14 border border-slate-300 rounded-xl text-center text-lg font-bold text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-2 focus:ring-[#ff8a4c]/20 transition shadow-2xs"
+							className="w-11 h-14 border border-slate-300 rounded-sm text-center text-lg font-bold text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-2 focus:ring-[#ff8a4c]/20 transition shadow-2xs"
 						/>
 					))}
 				</div>
@@ -184,16 +186,22 @@ function VerifyOtpClient() {
 						</button>
 					</span>
 
-					<span className="font-mono text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg text-xs font-semibold">
+					<span className="font-mono text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm text-xs font-semibold">
 						{formatTime(seconds)}
 					</span>
 				</div>
 
+				{formError && (
+					<p role="alert" className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2">
+						{formError}
+					</p>
+				)}
+
 				<button
 					onClick={handleVerify}
 					disabled={loading}
-					className={`w-full font-bold py-3.5 rounded-xl text-sm shadow-md transition cursor-pointer ${
-						loading ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none" : "bg-[#ff8a4c] hover:bg-[#f07432] text-white shadow-orange-500/20 active:scale-98"
+					className={`w-full font-bold py-3.5 rounded-sm text-sm shadow-2xs transition cursor-pointer ${
+						loading ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none" : "bg-[#ff8a4c] hover:bg-[#f07432] text-white active:scale-98"
 					}`}
 				>
 					{loading ? "Verifying Code…" : "Verify & Proceed"}
