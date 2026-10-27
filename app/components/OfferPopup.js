@@ -13,14 +13,12 @@ export default function OfferPopup() {
     let timer = null;
     let cancelled = false;
     const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    // Show on every homepage load (no once-per-tab lock).
     fetch(`${base}/popups/active`, { credentials: "include" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (cancelled || !data?.popup) return;
         const p = data.popup;
-        try {
-          if (sessionStorage.getItem(`kazilen_popup_${p.id}`) === "seen") return;
-        } catch {}
         setPopup(p);
         const delay = Math.max(1, Math.min(60, p.delay_seconds || 5)) * 1000;
         timer = setTimeout(() => setVisible(true), delay);
@@ -36,9 +34,6 @@ export default function OfferPopup() {
 
   const close = () => {
     setVisible(false);
-    try {
-      sessionStorage.setItem(`kazilen_popup_${popup.id}`, "seen");
-    } catch {}
   };
 
   const handleCta = () => {
