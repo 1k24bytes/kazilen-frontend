@@ -40,6 +40,13 @@ function PaymentBadge({ booking }) {
   return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-sm border bg-slate-100 text-slate-600 border-slate-200">Cash</span>;
 }
 
+function KazilenBadge({ booking }) {
+  if (booking?.admin_confirmed === 0) {
+    return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-sm border bg-amber-50 text-amber-800 border-amber-200">Awaiting Kazilen confirmation</span>;
+  }
+  return null;
+}
+
 export default function OrdersPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState([]);
@@ -139,6 +146,7 @@ export default function OrdersPage() {
                       </span>
                       <StatusBadge status={booking.status} />
                       <PaymentBadge booking={booking} />
+                      <KazilenBadge booking={booking} />
                       {(booking.time_slot?.toUpperCase().includes("ASAP") || booking.time_slot?.toUpperCase().includes("INSTANT")) && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-sm">
                           <Zap size={10} className="fill-amber-500 text-amber-600" /> Instant ASAP

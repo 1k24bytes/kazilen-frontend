@@ -27,6 +27,7 @@ export default function ProfilePage() {
   const router = useRouter()
   const [userProfile, setUserProfile] = useState({ full_name: '', phone_number: '', role: 'customer' })
   const [referral, setReferral] = useState({ code: '', points: 0, earnings: 0 })
+  const [myCodes, setMyCodes] = useState([])
   const [copied, setCopied] = useState(false)
   const [activeOtpBookings, setActiveOtpBookings] = useState([])
   const [copiedOtp, setCopiedOtp] = useState(null)
@@ -94,6 +95,12 @@ export default function ProfilePage() {
 
     fetchActiveBookings()
     fetchPlatformFeedback()
+    apiFetch(`${API_BASE_URL}/bookings/discounts/my`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.discounts) setMyCodes(d.discounts);
+      })
+      .catch(() => {})
     const interval = setInterval(() => {
       fetchActiveBookings()
     }, 4000)
@@ -329,7 +336,7 @@ export default function ProfilePage() {
               <div className="p-2 rounded-sm bg-[#fff4ed] text-[#ff8a4c]"><Gift size={18} /></div>
               <div>
                 <h2 className="text-sm font-bold text-slate-900">Refer a friend</h2>
-                <p className="text-xs text-slate-500 mt-1">Share your code and earn points + ₹ rewards when someone joins.</p>
+                <p className="text-xs text-slate-500 mt-1">Share your code and earn points + ₹ rewards + booking % off when someone joins.</p>
               </div>
             </div>
             <div className="text-right shrink-0">
@@ -351,6 +358,16 @@ export default function ProfilePage() {
               {copied ? 'Copied' : 'Copy invite link'}
             </button>
           </div>
+          {myCodes.length > 0 && (
+            <div className="mt-3 space-y-1.5">
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Your booking codes</p>
+              {myCodes.slice(0, 3).map((c) => (
+                <p key={c.code} className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-sm px-3 py-1.5">
+                  {c.code} · {c.discount_type === "percent" ? `${c.value}% off` : `₹${c.value} off`}
+                </p>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Logout CTA */}
