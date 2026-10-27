@@ -9,7 +9,7 @@ import { API_BASE_URL, apiFetch } from '@/lib/api'
 
 export default function Header() {
   const router = useRouter()
-  const [currentArea, setCurrentArea] = useState('Nagpur, MH')
+  const [currentArea, setCurrentArea] = useState('Select location')
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [showLocationBanner, setShowLocationBanner] = useState(false)
 
@@ -26,7 +26,7 @@ export default function Header() {
           .then((data) => {
             if (Array.isArray(data) && data.length > 0) {
               const def = data.find((a) => a.is_default) || data[0]
-              const shortArea = def.area ? `${def.area}, ${def.city || 'Nagpur'}` : (def.city || 'Nagpur')
+              const shortArea = [def.area, def.city].filter(Boolean).join(', ') || 'Select location'
               setCurrentArea(shortArea)
               localStorage.setItem('user_location_area', shortArea)
               localStorage.setItem('user_saved_address', def.full_address)
@@ -48,7 +48,7 @@ export default function Header() {
   }
 
   const handleAddressSelected = (fullAddress, shortArea) => {
-    setCurrentArea(shortArea || 'Nagpur, MH')
+    setCurrentArea(shortArea || 'Select location')
     setShowLocationBanner(false)
   }
 

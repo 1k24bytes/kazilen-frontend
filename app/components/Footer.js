@@ -18,7 +18,7 @@ export default function Footer() {
               <span className="text-xl font-bold text-white tracking-tight">Kazilen</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Nagpur&apos;s most trusted platform for instant, background-verified home services and repair professionals.
+              Your trusted platform for instant, background-verified home services and repair professionals.
             </p>
             <div className="flex items-center gap-2 text-xs text-[#ff8a4c]">
               <ShieldCheck size={16} />
@@ -56,7 +56,7 @@ export default function Footer() {
             <div className="space-y-2.5 text-xs text-slate-400">
               <div className="flex items-start gap-2">
                 <MapPin size={15} className="text-[#ff8a4c] shrink-0 mt-0.5" />
-                <span>Nagpur, Maharashtra, India</span>
+                <span>Available at your doorstep</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={15} className="text-[#ff8a4c] shrink-0" />
@@ -75,7 +75,7 @@ export default function Footer() {
         <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} Kazilen Technologies Pvt. Ltd. All rights reserved.</p>
           <p className="flex items-center gap-1">
-            Built for Nagpur with <Heart size={12} className="text-red-500 fill-red-500" />
+            Built with <Heart size={12} className="text-red-500 fill-red-500" /> for happy homes
           </p>
         </div>
       </div>

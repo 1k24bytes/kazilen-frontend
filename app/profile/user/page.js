@@ -120,19 +120,19 @@ export default function UserProfilePage() {
         <form onSubmit={handleSave} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-5">
           
           <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-            <div className="w-12 h-12 rounded-2xl bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-lg shadow-2xs">
+            <div className="w-12 h-12 rounded-md bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-lg shadow-2xs">
               {userInfo.full_name ? userInfo.full_name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900">{userInfo.full_name || 'Customer User'}</h2>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-sm border border-emerald-200">
                 <ShieldCheck size={11} /> Verified Account
               </span>
             </div>
           </div>
 
           {savedSuccess && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+            <div className="p-3 rounded-sm bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
               <Check size={16} className="text-emerald-600" />
               <span>Profile details updated successfully!</span>
             </div>

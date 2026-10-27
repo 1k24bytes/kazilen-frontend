@@ -43,7 +43,7 @@ export default function ViewDetailsButton({ professional, subCategory, price, pr
 	}, [showProfile, professional?.id, reviewsData]);
 
 	const name = professional?.full_name || professional?.name || "Verified Technician";
-	const location = professional?.locality || professional?.address || "Nagpur, MH";
+	const location = professional?.locality || professional?.address || "Nearby";
 	const reviews = Array.isArray(reviewsData?.reviews) ? reviewsData.reviews : [];
 	const averageRating = reviewsData?.average_rating != null ? Number(reviewsData.average_rating) : null;
 	const totalReviews = Number(reviewsData?.total_reviews_count) || 0;

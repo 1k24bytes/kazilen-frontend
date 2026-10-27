@@ -88,7 +88,7 @@ export default function ProfessionalCard({ professional, subCategory, catalogSub
 						<p className="text-xs text-slate-500 flex items-center gap-1">
 							<MapPin size={13} className="text-slate-400 shrink-0" />
 							<span className="truncate">
-								{professional.locality || professional.address || "Nagpur, MH"}
+								{professional.locality || professional.address || "Nearby"}
 								{professional.distance_km !== null && professional.distance_km !== undefined && Number.isFinite(Number(professional.distance_km)) && ` · ${Number(professional.distance_km)} km away`}
 							</span>
 						</p>

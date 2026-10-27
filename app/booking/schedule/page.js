@@ -857,13 +857,13 @@ export default function BookingSchedulePage() {
 
                           <div className="shrink-0 pt-0.5">
                             <div
-                              className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                              className={`w-4 h-4 rounded-sm border flex items-center justify-center ${
                                 isSelected
                                   ? "border-[#ff8a4c] bg-[#ff8a4c]"
                                   : "border-slate-300 bg-white"
                               }`}
                             >
-                              {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                              {isSelected && <div className="w-1.5 h-1.5 rounded-sm bg-white" />}
                             </div>
                           </div>
                         </div>
