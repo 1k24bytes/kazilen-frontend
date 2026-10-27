@@ -25,6 +25,21 @@ function StatusBadge({ status }) {
   );
 }
 
+function PaymentBadge({ booking }) {
+  const mode = booking?.payment_mode || "cash";
+  const st = booking?.payment_status || "cash";
+  if (st === "paid_online") {
+    return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-sm border bg-emerald-50 text-emerald-700 border-emerald-200">Paid Online</span>;
+  }
+  if (st === "awaiting_online") {
+    return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-sm border bg-amber-50 text-amber-800 border-amber-200">Awaiting Payment</span>;
+  }
+  if (mode === "online") {
+    return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-sm border bg-slate-100 text-slate-600 border-slate-200">Online</span>;
+  }
+  return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-sm border bg-slate-100 text-slate-600 border-slate-200">Cash</span>;
+}
+
 export default function OrdersPage() {
   const router = useRouter();
   const [bookings, setBookings] = useState([]);
@@ -123,6 +138,7 @@ export default function OrdersPage() {
                         {booking.service_id?.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
                       </span>
                       <StatusBadge status={booking.status} />
+                      <PaymentBadge booking={booking} />
                       {(booking.time_slot?.toUpperCase().includes("ASAP") || booking.time_slot?.toUpperCase().includes("INSTANT")) && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-sm">
                           <Zap size={10} className="fill-amber-500 text-amber-600" /> Instant ASAP
@@ -144,8 +160,17 @@ export default function OrdersPage() {
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2 shrink-0">
-                    {booking.amount && (
-                      <span className="text-sm font-extrabold text-slate-900">₹{booking.amount}</span>
+                    {booking.total_amount ? (
+                      <div className="text-right">
+                        <span className="text-sm font-extrabold text-slate-900">₹{booking.total_amount}</span>
+                        {booking.platform_fee && (
+                          <p className="text-[10px] text-slate-500 font-semibold">incl. ₹{booking.platform_fee} fee</p>
+                        )}
+                      </div>
+                    ) : (
+                      booking.amount && (
+                        <span className="text-sm font-extrabold text-slate-900">₹{booking.amount}</span>
+                      )
                     )}
                     <ChevronRight size={15} className="text-slate-400" />
                   </div>
