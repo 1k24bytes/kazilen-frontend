@@ -430,7 +430,7 @@ export default function BookingSchedulePage() {
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto p-4 space-y-4">
+      <div className="max-w-2xl mx-auto p-4 space-y-4 pb-28">
 
         {/* ------------------------------------------------------------------ */}
         {/* STEP 1: Mode + Date + Time                                         */}
@@ -652,13 +652,6 @@ export default function BookingSchedulePage() {
 
             {error && <p className="text-red-600 text-xs px-1 font-semibold">{error}</p>}
 
-            <button
-              onClick={handleNextStep}
-              disabled={!canProceedToStep2}
-              className="w-full py-3 bg-[#ff8a4c] hover:bg-[#f07432] text-white text-sm font-bold rounded-sm transition disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              Continue to Address <ArrowRight size={15} />
-            </button>
           </>
         )}
 
@@ -707,11 +700,10 @@ export default function BookingSchedulePage() {
                   label={feeLoading ? "Platform Fee (checking…)" : "Platform Fee"}
                   value={feeLoading ? "…" : `₹${platformFeeDisplay}`}
                 />
-                <SummaryRow
-                  label="Total Payable"
-                  value={`₹${totalPayableDisplay}`}
-                  highlight
-                />
+                <div className="flex items-center justify-between rounded-sm bg-[#fff4ed] border border-orange-200 px-3 py-2.5">
+                  <span className="text-xs font-bold text-slate-900">Total Payable</span>
+                  <span className="text-base font-extrabold tabular-nums text-[#ff8a4c]">₹{totalPayableDisplay}</span>
+                </div>
                 <SummaryRow
                   label="Payment"
                   value={paymentMode === "online" ? "Pay Online (UPI / Card)" : "Cash / Pay on Completion"}
@@ -906,25 +898,7 @@ export default function BookingSchedulePage() {
 
             {error && <p className="text-red-600 text-xs px-1 font-semibold">{error}</p>}
 
-            <button
-              onClick={handleConfirm}
-              disabled={loading || payingOnline || !canConfirm}
-              className="w-full py-3 bg-[#ff8a4c] hover:bg-[#f07432] text-white text-sm font-bold rounded-sm transition disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
-            >
-              {loading || payingOnline ? (
-                payingOnline ? "Opening payment…" : "Confirming..."
-              ) : paymentMode === "online" ? (
-                <>
-                  <CheckCircle2 size={16} />
-                  Pay ₹{totalPayableDisplay} Online & Dispatch Now
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 size={16} />
-                  Confirm & Dispatch Now — ₹{totalPayableDisplay} (Cash)
-                </>
-              )}
-            </button>
+
             {paymentMode === "online" && (
               <p className="text-[11px] text-slate-400 leading-relaxed text-center">
                 Secure UPI / card payment via Razorpay. If money is debited but booking does not confirm instantly, it auto-confirms — check My Bookings.
@@ -933,6 +907,50 @@ export default function BookingSchedulePage() {
           </>
         )}
 
+      </div>
+
+
+      {/* Sticky total + action bar */}
+      <div className="fixed bottom-0 inset-x-0 z-30 border-t border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3" style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              {step === 1 ? "Estimated total" : "Total payable"}
+            </p>
+            <p className="truncate text-lg font-extrabold tabular-nums text-slate-900">
+              ₹{step === 1 ? totalAmount : totalPayableDisplay}
+            </p>
+          </div>
+          {step === 1 ? (
+            <button
+              onClick={handleNextStep}
+              disabled={!canProceedToStep2}
+              className="shrink-0 rounded-sm bg-[#ff8a4c] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#f07432] disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff8a4c] focus-visible:ring-offset-2"
+            >
+              Continue <ArrowRight size={15} aria-hidden="true" />
+            </button>
+          ) : (
+            <button
+              onClick={handleConfirm}
+              disabled={loading || payingOnline || !canConfirm}
+              className="shrink-0 rounded-sm bg-[#ff8a4c] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#f07432] disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ff8a4c] focus-visible:ring-offset-2"
+            >
+              {loading || payingOnline ? (
+                payingOnline ? "Opening payment…" : "Confirming..."
+              ) : paymentMode === "online" ? (
+                <>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  Pay ₹{totalPayableDisplay} Online
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={16} aria-hidden="true" />
+                  Confirm · Cash
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Location Modal */}
