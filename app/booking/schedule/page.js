@@ -112,6 +112,9 @@ export default function BookingSchedulePage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [discountCode, setDiscountCode] = useState("");
+  const [discountInfo, setDiscountInfo] = useState(null);
+  const [discountMsg, setDiscountMsg] = useState("");
 
   // Booked slots state
   const [bookedHours, setBookedHours] = useState([]);
@@ -211,6 +214,28 @@ export default function BookingSchedulePage() {
   // ---------------------------------------------------------------------------
   // Confirm booking (Step 2)
   // ---------------------------------------------------------------------------
+  const applyDiscount = async () => {
+    const code = discountCode.trim().toUpperCase();
+    if (!code) {
+      setDiscountMsg("Enter a code first.");
+      return;
+    }
+    setDiscountMsg("Checking...");
+    try {
+      const res = await apiFetch(`${API_BASE_URL}/bookings/validate-discount?code=${encodeURIComponent(code)}&amount=${encodeURIComponent(totalAmount)}`);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setDiscountInfo(null);
+        setDiscountMsg(data.detail || "Invalid code.");
+        return;
+      }
+      setDiscountInfo(data);
+      setDiscountMsg(`Saved ₹${data.amount_off}. Pay ₹${data.final_amount}.`);
+    } catch {
+      setDiscountMsg("Network error. Try again.");
+    }
+  };
+
   const handleConfirm = async () => {
     if (!canConfirm) {
       setError("Please enter a valid address with at least 6 characters.");
@@ -235,6 +260,7 @@ export default function BookingSchedulePage() {
           time_slot: timeSlotToSend,
           address: address.trim(),
           amount: totalAmount,
+          discount_code: discountCode.trim().toUpperCase() || undefined,
         }),
       });
 
@@ -561,6 +587,32 @@ export default function BookingSchedulePage() {
                 />
                 <SummaryRow label="Payment" value="Cash / Pay on Completion" />
               </div>
+            </div>
+
+            {/* Discount code */}
+            <div className="bg-white rounded-md border border-slate-200 p-4 shadow-2xs space-y-2">
+              <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Discount Code (optional)</h2>
+              <div className="flex gap-2">
+                <input
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                  placeholder="e.g. DIWALI10"
+                  className="flex-1 h-9 bg-white border border-slate-300 text-sm font-bold text-slate-900 rounded-sm px-3 focus:outline-none focus:border-[#ff8a4c]"
+                />
+                <button
+                  type="button"
+                  onClick={applyDiscount}
+                  className="px-3.5 py-1.5 rounded-sm bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition cursor-pointer"
+                >
+                  Apply
+                </button>
+              </div>
+              {discountMsg && <p className="text-[11px] font-semibold text-slate-600">{discountMsg}</p>}
+              {discountInfo && (
+                <p className="text-xs font-bold text-emerald-700">
+                  Total ₹{totalAmount} → Pay ₹{discountInfo.final_amount} (saved ₹{discountInfo.amount_off})
+                </p>
+              )}
             </div>
 
             {/* Address Selection Card */}
