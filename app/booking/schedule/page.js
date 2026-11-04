@@ -115,6 +115,11 @@ export default function BookingSchedulePage() {
   const [discountCode, setDiscountCode] = useState("");
   const [discountInfo, setDiscountInfo] = useState(null);
   const [discountMsg, setDiscountMsg] = useState("");
+  // Online payment (feature/payment): cash | online + platform fee quote
+  const [paymentMode, setPaymentMode] = useState("cash");
+  const [feeQuote, setFeeQuote] = useState(null);
+  const [feeLoading, setFeeLoading] = useState(false);
+  const [payingOnline, setPayingOnline] = useState(false);
 
   // Booked slots state
   const [bookedHours, setBookedHours] = useState([]);
@@ -161,6 +166,57 @@ export default function BookingSchedulePage() {
     : amount
     ? String(parseInt(amount) * duration)
     : "199";
+
+  // Base after discount (what the platform fee is computed on server-side too)
+  const baseAfterDiscount = discountInfo?.final_amount != null
+    ? String(discountInfo.final_amount)
+    : String(totalAmount);
+
+  // Fetch platform fee quote whenever base changes (Step 2)
+  useEffect(() => {
+    const baseNum = parseInt(baseAfterDiscount || "0", 10);
+    if (!baseNum || Number.isNaN(baseNum)) {
+      setFeeQuote(null);
+      return;
+    }
+    let cancelled = false;
+    setFeeLoading(true);
+    apiFetch(`${API_BASE_URL}/platform-fees/quote?amount=${baseNum}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setFeeQuote(data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setFeeLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [baseAfterDiscount]);
+
+  const platformFeeDisplay = feeQuote?.platform_fee ?? 0;
+  const totalPayableDisplay = feeQuote?.total_amount ?? (parseInt(baseAfterDiscount || "0", 10) || 0);
+
+  function loadRazorpayScript() {
+    return new Promise((resolve, reject) => {
+      if (typeof window !== "undefined" && window.Razorpay) {
+        resolve(true);
+        return;
+      }
+      const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve(true));
+        existing.addEventListener("error", () => reject(new Error("Gateway failed to load")));
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(new Error("Payment gateway failed to load. Check connection and retry."));
+      document.body.appendChild(script);
+    });
+  }
 
   // ---------------------------------------------------------------------------
   // Fetch booked slots whenever worker + date changes (only when scheduled)
@@ -261,16 +317,82 @@ export default function BookingSchedulePage() {
           address: address.trim(),
           amount: totalAmount,
           discount_code: discountCode.trim().toUpperCase() || undefined,
+          payment_mode: paymentMode,
         }),
       });
 
       const data = await res.json();
-      if (res.ok) {
+      if (!res.ok) {
+        if (res.status === 402) {
+          setError(`${data.detail || "This specialist has reached the booking limit."} Please pick another verified partner.`);
+        } else {
+          setError(data.detail || "Booking failed. Please try again.");
+        }
+        return;
+      }
+      // Cash: done — go to orders.
+      if (paymentMode === "cash") {
         router.push("/profile/orders");
-      } else if (res.status === 402) {
-        setError(`${data.detail || "This specialist has reached the booking limit."} Please pick another verified partner.`);
-      } else {
-        setError(data.detail || "Booking failed. Please try again.");
+        return;
+      }
+      // Online: create Razorpay order for this booking, then checkout.
+      const bookingId = data.id;
+      if (!bookingId) {
+        setError("Booking created but payment could not start. Check My Bookings to pay.");
+        router.push("/profile/orders");
+        return;
+      }
+      setPayingOnline(true);
+      try {
+        await loadRazorpayScript();
+        const orderRes = await apiFetch(`${API_BASE_URL}/payments/booking/order?booking_id=${bookingId}`, {
+          method: "POST",
+        });
+        const orderData = await orderRes.json().catch(() => ({}));
+        if (!orderRes.ok) {
+          setError(orderData.detail || "Could not start online payment. Booking is saved — pay from My Bookings.");
+          router.push("/profile/orders");
+          return;
+        }
+        const options = {
+          key: orderData.key_id,
+          amount: orderData.amount,
+          currency: orderData.currency || "INR",
+          order_id: orderData.order_id,
+          name: "Kazilen",
+          description: `${subCategory?.label || serviceId} booking (#${bookingId})`,
+          theme: { color: "#ff8a4c" },
+          modal: { ondismiss: () => setPayingOnline(false) },
+          handler: async (resp) => {
+            try {
+              const verifyRes = await apiFetch(`${API_BASE_URL}/payments/booking/verify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: resp.razorpay_order_id,
+                  razorpay_payment_id: resp.razorpay_payment_id,
+                  razorpay_signature: resp.razorpay_signature,
+                }),
+              });
+              const verifyData = await verifyRes.json().catch(() => ({}));
+              if (!verifyRes.ok) {
+                setError(verifyData.detail || "Payment verification failed. If money was debited it will auto-confirm — check My Bookings.");
+                setPayingOnline(false);
+                return;
+              }
+              router.push("/profile/orders");
+            } catch {
+              setError("Verification failed. If money was debited it will auto-confirm via webhook — check My Bookings.");
+              setPayingOnline(false);
+            }
+          },
+        };
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", () => setPayingOnline(false));
+        rzp.open();
+      } catch (payErr) {
+        setError(payErr?.message || "Online payment could not start. Booking is saved — pay from My Bookings.");
+        setPayingOnline(false);
       }
     } catch {
       setError("Network error. Please try again.");
@@ -580,13 +702,27 @@ export default function BookingSchedulePage() {
                   label="Pricing Model"
                   value={isFixedPrice ? "Fixed Job Price (Flat)" : `₹${amount || 199}/hr (Hourly)`}
                 />
+                <SummaryRow label="Service Amount" value={`₹${baseAfterDiscount}`} />
+                {discountInfo && (
+                  <SummaryRow label="Discount Saved" value={`− ₹${discountInfo.amount_off}`} />
+                )}
                 <SummaryRow
-                  label="Total Amount"
-                  value={`₹${totalAmount}`}
+                  label={feeLoading ? "Platform Fee (checking…)" : "Platform Fee"}
+                  value={feeLoading ? "…" : `₹${platformFeeDisplay}`}
+                />
+                <SummaryRow
+                  label="Total Payable"
+                  value={`₹${totalPayableDisplay}`}
                   highlight
                 />
-                <SummaryRow label="Payment" value="Cash / Pay on Completion" />
+                <SummaryRow
+                  label="Payment"
+                  value={paymentMode === "online" ? "Pay Online (UPI / Card)" : "Cash / Pay on Completion"}
+                />
               </div>
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                Platform fee is set by Kazilen admin (e.g. ₹25 on ₹0–200, ₹30 on ₹201–500). Charged in total for both cash and online.
+              </p>
             </div>
 
             {/* Discount code */}
@@ -613,6 +749,41 @@ export default function BookingSchedulePage() {
                   Total ₹{totalAmount} → Pay ₹{discountInfo.final_amount} (saved ₹{discountInfo.amount_off})
                 </p>
               )}
+            </div>
+
+            {/* Payment mode */}
+            <div className="bg-white rounded-md border border-slate-200 p-4 shadow-2xs space-y-3">
+              <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Payment Mode</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMode("cash")}
+                  className={`p-3.5 rounded-sm border text-left transition cursor-pointer ${
+                    paymentMode === "cash"
+                      ? "bg-[#fff4ed] border-[#ff8a4c] ring-1 ring-[#ff8a4c]"
+                      : "bg-slate-50 border-slate-200 hover:bg-slate-100/80"
+                  }`}
+                >
+                  <span className="text-xs font-bold text-slate-900">Cash / Pay on Completion</span>
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    Pay ₹{totalPayableDisplay} in cash after the job (incl. ₹{platformFeeDisplay} fee).
+                  </p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMode("online")}
+                  className={`p-3.5 rounded-sm border text-left transition cursor-pointer ${
+                    paymentMode === "online"
+                      ? "bg-[#fff4ed] border-[#ff8a4c] ring-1 ring-[#ff8a4c]"
+                      : "bg-slate-50 border-slate-200 hover:bg-slate-100/80"
+                  }`}
+                >
+                  <span className="text-xs font-bold text-slate-900">Pay Online (UPI / Card)</span>
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    Pay ₹{totalPayableDisplay} now securely via Razorpay.
+                  </p>
+                </button>
+              </div>
             </div>
 
             {/* Address Selection Card */}
@@ -740,18 +911,28 @@ export default function BookingSchedulePage() {
 
             <button
               onClick={handleConfirm}
-              disabled={loading || !canConfirm}
+              disabled={loading || payingOnline || !canConfirm}
               className="w-full py-3 bg-[#ff8a4c] hover:bg-[#f07432] text-white text-sm font-bold rounded-sm transition disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer"
             >
-              {loading ? (
-                "Confirming..."
+              {loading || payingOnline ? (
+                payingOnline ? "Opening payment…" : "Confirming..."
+              ) : paymentMode === "online" ? (
+                <>
+                  <CheckCircle2 size={16} />
+                  Pay ₹{totalPayableDisplay} Online & Dispatch Now
+                </>
               ) : (
                 <>
                   <CheckCircle2 size={16} />
-                  Confirm & Dispatch Now — ₹{totalAmount}
+                  Confirm & Dispatch Now — ₹{totalPayableDisplay} (Cash)
                 </>
               )}
             </button>
+            {paymentMode === "online" && (
+              <p className="text-[11px] text-slate-400 leading-relaxed text-center">
+                Secure UPI / card payment via Razorpay. If money is debited but booking does not confirm instantly, it auto-confirms — check My Bookings.
+              </p>
+            )}
           </>
         )}
 
