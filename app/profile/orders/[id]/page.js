@@ -155,6 +155,11 @@ export default function BookingDetailPage() {
               <div>
                 <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Current Status</p>
                 <StatusBadge status={booking.status} />
+                {booking?.admin_confirmed === 0 && (
+                  <p className="mt-1.5 inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-sm border bg-amber-50 text-amber-800 border-amber-200">
+                    Awaiting Kazilen confirmation
+                  </p>
+                )}
                 {booking.worker_name && (
                   <p className="text-xs text-slate-700 font-semibold mt-2 flex items-center gap-1.5">
                     <User size={13} className="text-[#ff8a4c] shrink-0" />
@@ -162,10 +167,13 @@ export default function BookingDetailPage() {
                   </p>
                 )}
               </div>
-              {booking.amount && (
+              {(booking.total_amount || booking.amount) && (
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Rate</p>
-                  <p className="text-lg font-extrabold text-slate-900">₹{booking.amount}</p>
+                  <p className="text-lg font-extrabold text-slate-900">₹{booking.total_amount || booking.amount}</p>
+                  {booking.platform_fee && (
+                    <p className="text-[10px] text-slate-500 font-semibold">incl. ₹{booking.platform_fee} fee</p>
+                  )}
                 </div>
               )}
             </div>
