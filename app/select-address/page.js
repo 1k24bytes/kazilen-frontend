@@ -15,6 +15,7 @@ export default function SavedAddressesPage() {
   const [loading, setLoading] = useState(true)
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
   const [actionLoadingId, setActionLoadingId] = useState(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
 
   const fetchAddresses = async () => {
     try {
@@ -53,7 +54,14 @@ export default function SavedAddressesPage() {
   }
 
   const handleDelete = async (addressId) => {
-    if (!confirm('Are you sure you want to delete this saved address?')) return
+    if (confirmDeleteId !== addressId) {
+      setConfirmDeleteId(addressId)
+      window.setTimeout(() => {
+        setConfirmDeleteId((current) => (current === addressId ? null : current))
+      }, 4000)
+      return
+    }
+    setConfirmDeleteId(null)
 
     setActionLoadingId(addressId)
     try {
@@ -191,12 +199,19 @@ export default function SavedAddressesPage() {
                       type="button"
                       onClick={() => handleDelete(addr.id)}
                       disabled={actionLoadingId === addr.id}
-                      className="p-1.5 rounded-sm hover:bg-red-50 text-slate-400 hover:text-red-600 transition cursor-pointer"
-                      title="Delete Address"
-                      aria-label="Delete Address"
+                      aria-label={confirmDeleteId === addr.id ? "Confirm delete address" : "Delete address"}
+                      title={confirmDeleteId === addr.id ? "Tap again to confirm delete" : "Delete Address"}
+                      className={`p-1.5 rounded-sm transition cursor-pointer ${
+                        confirmDeleteId === addr.id
+                          ? "bg-red-600 text-white hover:bg-red-700"
+                          : "hover:bg-red-50 text-slate-400 hover:text-red-600"
+                      }`}
                     >
                       <Trash2 size={15} />
                     </button>
+                    {confirmDeleteId === addr.id && (
+                      <span className="text-[11px] font-bold text-red-600">Tap again to confirm</span>
+                    )}
                   </div>
                 </div>
               </div>

@@ -43,7 +43,7 @@ export default function ViewDetailsButton({ professional, subCategory, price, pr
 	}, [showProfile, professional?.id, reviewsData]);
 
 	const name = professional?.full_name || professional?.name || "Verified Technician";
-	const location = professional?.locality || professional?.address || "Nagpur, MH";
+	const location = professional?.locality || professional?.address || "Nearby";
 	const reviews = Array.isArray(reviewsData?.reviews) ? reviewsData.reviews : [];
 	const averageRating = reviewsData?.average_rating != null ? Number(reviewsData.average_rating) : null;
 	const totalReviews = Number(reviewsData?.total_reviews_count) || 0;
@@ -70,11 +70,11 @@ export default function ViewDetailsButton({ professional, subCategory, price, pr
 			{showProfile && (
 				<div 
 					onClick={() => setShowProfile(false)}
-					className="fixed inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs z-50 p-4"
+					className="fixed inset-0 flex items-center justify-center bg-slate-900/40 z-50 p-4"
 				>
 					<div 
 						onClick={(e) => e.stopPropagation()}
-						className="bg-white rounded-md border border-slate-200 w-full max-w-md p-6 text-slate-900 space-y-5 shadow-xl relative"
+						className="bg-white rounded-md border border-slate-200 w-full max-w-md p-6 text-slate-900 space-y-5 shadow-2xl relative"
 					>
 						{/* Header */}
 						<div className="flex justify-between items-center pb-3 border-b border-slate-100">

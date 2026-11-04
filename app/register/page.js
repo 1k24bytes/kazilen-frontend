@@ -18,6 +18,7 @@ function CreateAccountClient() {
   const [referralCode, setReferralCode] = useState(referralCodeFromQuery.toUpperCase().slice(0, 6));
   const [touched, setTouched] = useState({ name: false });
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
 
   const canSubmit = name.trim().length > 0 && /^\d{10}$/.test(phoneNo);
 
@@ -29,6 +30,7 @@ function CreateAccountClient() {
 
     try {
       setLoading(true);
+      setFormError("");
 
       const payload = {
         phone_number: `91${phoneNo}`,
@@ -48,16 +50,15 @@ function CreateAccountClient() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.detail || "Registration failed");
+        setFormError(data.detail || "Registration failed. Check the details and try again.");
         return;
       }
 
       if (data.status === "success") {
-        alert("Account created successfully!");
         router.replace("/");
       }
     } catch (err) {
-      alert(`Create failed: ${err?.message || "Something went wrong"}`);
+      setFormError(`Create failed: ${err?.message || "Something went wrong"}.`);
     } finally {
       setLoading(false);
     }
@@ -177,6 +178,12 @@ function CreateAccountClient() {
               </div>
             </div>
           </div>
+
+          {formError && (
+            <p role="alert" className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-sm px-3 py-2">
+              {formError}
+            </p>
+          )}
 
           <button
             onClick={handleCreateAccount}

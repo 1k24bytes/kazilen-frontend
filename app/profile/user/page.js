@@ -117,22 +117,22 @@ export default function UserProfilePage() {
       <BackHeader title="Personal Information" />
 
       <main className="max-w-xl mx-auto px-4 py-8 space-y-6">
-        <form onSubmit={handleSave} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-2xs space-y-5">
+        <form onSubmit={handleSave} className="bg-white rounded-md border border-slate-200 p-6 shadow-2xs space-y-5">
           
           <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
-            <div className="w-12 h-12 rounded-2xl bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-lg shadow-2xs">
+            <div className="w-12 h-12 rounded-md bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-lg shadow-2xs">
               {userInfo.full_name ? userInfo.full_name.charAt(0).toUpperCase() : 'U'}
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900">{userInfo.full_name || 'Customer User'}</h2>
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200">
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-sm border border-emerald-200">
                 <ShieldCheck size={11} /> Verified Account
               </span>
             </div>
           </div>
 
           {savedSuccess && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+            <div className="p-3 rounded-sm bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
               <Check size={16} className="text-emerald-600" />
               <span>Profile details updated successfully!</span>
             </div>
@@ -148,7 +148,7 @@ export default function UserProfilePage() {
                 value={userInfo.full_name}
                 onChange={(e) => setUserInfo({ ...userInfo, full_name: e.target.value })}
                 placeholder="e.g. Rahul Sharma"
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition"
+                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-sm text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function UserProfilePage() {
                 value={userInfo.phone_number}
                 readOnly
                 placeholder="+91 Mobile Number"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-100/80 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 cursor-not-allowed"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-100/80 border border-slate-200 rounded-sm text-sm font-semibold text-slate-800 cursor-not-allowed"
               />
             </div>
           </div>
@@ -178,7 +178,7 @@ export default function UserProfilePage() {
                   type="date"
                   value={userInfo.dob}
                   onChange={(e) => setUserInfo({ ...userInfo, dob: e.target.value })}
-                  className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition"
+                  className="w-full pl-10 pr-3 py-2.5 border border-slate-300 rounded-sm text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition"
                 />
               </div>
             </div>
@@ -190,7 +190,7 @@ export default function UserProfilePage() {
                 <select
                   value={userInfo.gender}
                   onChange={(e) => setUserInfo({ ...userInfo, gender: e.target.value })}
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition bg-white appearance-none"
+                  className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-sm text-sm font-medium text-slate-900 focus:outline-none focus:border-[#ff8a4c] focus:ring-1 focus:ring-[#ff8a4c] transition bg-white appearance-none"
                 >
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -204,7 +204,7 @@ export default function UserProfilePage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-[#ff8a4c] hover:bg-[#f07432] text-white font-bold py-3 rounded-xl text-sm shadow-2xs transition cursor-pointer flex items-center justify-center gap-2"
+              className="w-full bg-[#ff8a4c] hover:bg-[#f07432] text-white font-bold py-3 rounded-sm text-sm shadow-2xs transition cursor-pointer flex items-center justify-center gap-2"
             >
               <Save size={16} />
               <span>{saving ? 'Saving Changes...' : 'Save Profile Details'}</span>

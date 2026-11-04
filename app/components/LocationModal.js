@@ -33,7 +33,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
     street: '',
     area: '',
     landmark: '',
-    city: 'Nagpur',
+    city: '',
     pincode: ''
   })
 
@@ -96,7 +96,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
 
             const streetVal = addr.road || addr.street || addr.suburb || ''
             const areaVal = addr.neighbourhood || addr.suburb || addr.residential || addr.city_district || addr.subdistrict || ''
-            const cityVal = addr.city || addr.town || addr.municipality || addr.county || 'Nagpur'
+            const cityVal = addr.city || addr.town || addr.municipality || addr.county || ''
             const pincodeVal = addr.postcode || ''
             const houseVal = addr.house_number || ''
 
@@ -104,7 +104,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
               ...prev,
               flatNo: prev.flatNo || houseVal,
               street: streetVal,
-              area: areaVal || (addr.state_district ? addr.state_district : 'Nagpur'),
+              area: areaVal || addr.state_district || '',
               city: cityVal,
               pincode: pincodeVal
             }))
@@ -150,7 +150,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
   // Handle selecting an existing saved address
   const handleSelectSaved = (savedAddr) => {
     const fullAddress = savedAddr.full_address
-    const shortArea = savedAddr.area ? `${savedAddr.area}, ${savedAddr.city || 'Nagpur'}` : (savedAddr.city || 'Nagpur')
+    const shortArea = [savedAddr.area, savedAddr.city].filter(Boolean).join(', ') || 'Your location'
 
     try {
       localStorage.setItem('user_saved_address', fullAddress)
@@ -180,7 +180,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
       formData.landmark ? `Near ${formData.landmark.trim()}` : '',
       formData.street?.trim(),
       formData.area?.trim(),
-      formData.city?.trim() || 'Nagpur',
+      formData.city?.trim() || '',
       formData.pincode ? `- ${formData.pincode.trim()}` : ''
     ].filter(Boolean)
 
@@ -191,7 +191,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
       return
     }
 
-    const shortArea = formData.area ? `${formData.area}, ${formData.city || 'Nagpur'}` : (formData.city || 'Nagpur')
+    const shortArea = [formData.area, formData.city].filter(Boolean).join(', ') || 'Your location'
 
     try {
       localStorage.setItem('user_saved_address', fullAddress)
@@ -215,7 +215,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
             street: formData.street?.trim() || null,
             area: formData.area.trim(),
             landmark: formData.landmark?.trim() || null,
-            city: formData.city?.trim() || 'Nagpur',
+            city: formData.city?.trim() || '',
             pincode: formData.pincode?.trim() || null,
             full_address: fullAddress,
             latitude: coords?.latitude || null,
@@ -238,8 +238,8 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-md border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+      <div className="bg-white rounded-md border border-slate-200 shadow-2xl max-w-lg w-full overflow-hidden">
         
         {/* Modal Header */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -466,7 +466,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress, initia
                       type="text"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      placeholder="Nagpur"
+                      placeholder="City"
                       className="w-full bg-white border border-slate-300 rounded-sm px-3 py-2 text-xs text-slate-900 focus:border-[#ff8a4c] outline-none"
                     />
                   </div>

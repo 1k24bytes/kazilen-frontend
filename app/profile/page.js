@@ -159,7 +159,7 @@ export default function ProfilePage() {
         {/* User Card */}
         <div className="bg-white rounded-md border border-slate-200 p-6 shadow-xs flex items-center justify-between gap-4">
           <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 rounded-md bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-xl shadow-md shadow-orange-500/20 shrink-0">
+            <div className="w-14 h-14 rounded-md bg-[#ff8a4c] text-white flex items-center justify-center font-bold text-xl shrink-0">
               {initial}
             </div>
             <div className="flex-1 min-w-0">
